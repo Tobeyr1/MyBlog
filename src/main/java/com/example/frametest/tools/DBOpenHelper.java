@@ -6,7 +6,7 @@ import java.sql.SQLException;
 
 public class DBOpenHelper {
     private static String driver = "com.mysql.jdbc.Driver"; //MySql驱动
-    private static String url = "jdbc:mysql://192.168.1.121:3306/user?characterEncoding=utf-8"; //MySql数据库连接url
+    private static String url = "jdbc:mysql://148.70.181.52:3306/user?characterEncoding=utf-8"; //MySql数据库连接url
     private static String user = "liu"; //用户名
     private static String paswword = "031122"; //密码
     /*连接数据库*/
