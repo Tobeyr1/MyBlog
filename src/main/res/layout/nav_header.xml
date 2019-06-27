@@ -13,29 +13,24 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@mipmap/mouse"
+        android:layout_centerInParent="true"
         />
-    <ImageView
-        android:id="@+id/icon_image1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        tools:ignore="InvalidId" />
-
     <TextView
         android:id="@+id/text_huoqu"
         android:layout_width="wrap_content"
-        android:text="可以自己设置东西"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:textColor="@color/colorBlack"
         android:textSize="14sp"
         tools:ignore="HardcodedText" />
+
     <TextView
         android:id="@+id/text_username"
         android:layout_above="@id/text_huoqu"
         android:textColor="@color/colorBlack"
         android:textSize="14sp"
-        android:text="个人博客地址：https://blog.csdn.net/Tobey_r1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        tools:ignore="HardcodedText" />
+        tools:ignore="HardcodedText"
+         />
 </RelativeLayout>

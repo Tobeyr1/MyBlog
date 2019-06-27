@@ -7,4 +7,7 @@
     <color name="colorBlack">#000</color>
     <color name="colorWhite">#FFF</color>
     <color name="colorhuise">#DCDCDC</color>
+    <color name="colorpink">#FF7F50</color>
+    <color name="colorBackground">#ffffff</color>
+    <color name="jinse">#FFD700</color>
 </resources>

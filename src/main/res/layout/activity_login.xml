@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".UserMode.LoginActivity">
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:layout_width="wrap_content"
+        android:id="@+id/imageLogo"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:src="@mipmap/ic_launcher_foreground"
+        android:layout_centerInParent="true"
+        />
+
+    <TextView
+        android:id="@+id/textview_login"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/imageLogo"
+        android:layout_marginTop="40dp"
+        android:text="手机号快速登陆"
+        android:textStyle="bold" />
+
+    <EditText
+        android:id="@+id/login_input_phone_et"
+        android:layout_width="280dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textview_login"
+        android:layout_marginTop="28dp"
+        android:ems="10"
+        android:hint="请输入手机号"
+        android:inputType="phone" />
+
+    <requestFocus />
+
+    <EditText
+        android:id="@+id/login_input_code_et"
+        android:layout_width="170dp"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/login_input_phone_et"
+        android:layout_below="@+id/login_input_phone_et"
+        android:layout_marginTop="30dp"
+        android:hint="请输入验证码"
+        android:inputType="textPassword">
+
+    </EditText>
+
+    <Button
+        android:id="@+id/login_request_code_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignRight="@+id/login_input_phone_et"
+        android:layout_alignTop="@+id/login_input_code_et"
+        android:background="#01000000"
+        android:text="获取验证码" />
+
+    <Button
+        android:id="@+id/login_commit_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/login_input_code_et"
+        android:layout_below="@+id/login_input_code_et"
+        android:backgroundTint="@color/colorpink"
+        android:textColor="@color/colorhuise"
+        android:layout_marginTop="5dp"
+        android:text="开始使用" />
+
+    <Button
+        android:id="@+id/btn_relogin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/login_input_code_et"
+        android:layout_alignEnd="@+id/login_input_phone_et"
+        android:layout_alignRight="@id/login_request_code_btn"
+        android:layout_marginTop="65dp"
+        android:layout_marginEnd="-88dp"
+        android:layout_marginRight="-88dp"
+        android:background="#01000000"
+        android:text="手机号注册"
+        android:textStyle="bold" />
+
+</RelativeLayout>
