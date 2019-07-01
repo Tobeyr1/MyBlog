@@ -150,6 +150,7 @@ public class NewsFragment extends Fragment {
                 },1000);
             }
         });
+
         //异步加载数据
         getDataFromNet(data);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
