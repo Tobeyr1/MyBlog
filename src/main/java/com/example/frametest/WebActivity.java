@@ -4,6 +4,7 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.net.http.SslError;
+import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -17,10 +18,18 @@ import android.webkit.WebViewClient;
 import android.widget.SearchView;
 import android.widget.Toast;
 
+import com.example.frametest.UserMode.LoginActivity;
+import com.example.frametest.tools.DBOpenHelper;
+import com.example.frametest.tools.MyApplication;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
 public class WebActivity extends AppCompatActivity {
     private WebView webView;
     private Toolbar toolbar,ltoolBar;
-    String url;
+    String url,user_phonenumber;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -85,6 +94,34 @@ public class WebActivity extends AppCompatActivity {
                         break;
                     case R.id.news_collect:
                         //下一步实现点击收藏功能，以及用户查看收藏功能
+                      user_phonenumber = MyApplication.getInstance().getMoublefhoneUser();
+                        if (user_phonenumber != null){
+                            Toast.makeText(WebActivity.this,"收藏成功",Toast.LENGTH_SHORT).show();
+                            new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Connection conn = null;
+                                    conn = (Connection) DBOpenHelper.getConn();
+                                    String uniquekey = getIntent().getStringExtra("uniquekey");
+                                    String sql = "insert into user_collect(user_phone,news_id) values(?,?)";
+                                    int i = 0;
+                                    PreparedStatement pstmt;
+                                    try {
+                                        pstmt = (PreparedStatement) conn.prepareStatement(sql);
+                                        pstmt.setString(1,user_phonenumber);
+                                        pstmt.setString(2,uniquekey);
+                                        i = pstmt.executeUpdate();
+                                        pstmt.close();
+                                        conn.close();
+                                    } catch (SQLException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }).start();
+                        } else {
+                            Intent exitIntent = new Intent(WebActivity.this,LoginActivity.class);
+                            startActivityForResult(exitIntent,4);
+                        }
                         break;
                 }
                 return true;
@@ -94,6 +131,22 @@ public class WebActivity extends AppCompatActivity {
         if (actionBar != null){
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setHomeAsUpIndicator(R.drawable.ic_chevron_left);
+        }
+    }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        switch (requestCode){
+            case 4:
+                if (resultCode == RESULT_OK){
+                    String returnedData = data.getStringExtra("data_return");
+                    user_phonenumber =returnedData;
+                    if (returnedData != null){
+                    }else {
+                        Toast.makeText(this,"登陆失败",Toast.LENGTH_SHORT).show();
+                    }
+                }
+                break;
+            default:
         }
     }
     @Override

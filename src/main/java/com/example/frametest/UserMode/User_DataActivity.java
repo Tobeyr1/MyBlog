@@ -34,6 +34,7 @@ import android.widget.Toast;
 
 import com.example.frametest.R;
 import com.example.frametest.tools.DBOpenHelper;
+import com.example.frametest.tools.MyApplication;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -66,7 +67,7 @@ public class User_DataActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user__data);
-        user_setting_phone = getIntent().getStringExtra("user_settings");
+        user_setting_phone = MyApplication.getMoublefhoneUser();
         Toolbar uToolbar = (Toolbar) findViewById(R.id.userData_toolbar);
         tv_user_photo = (TextView)findViewById(R.id.tv_user_photo);
         imageView_user = (ImageView)findViewById(R.id.imageView_user);
@@ -245,8 +246,6 @@ public class User_DataActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         Intent intent = new Intent();
-        intent.putExtra("return_name",input_userName);
-        setResult(RESULT_OK,intent);
         finish();
     }
 }

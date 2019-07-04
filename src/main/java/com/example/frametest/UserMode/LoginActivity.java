@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import com.example.frametest.R;
 import com.example.frametest.tools.DBOpenHelper;
+import com.example.frametest.tools.MyApplication;
 import com.mob.MobSDK;
 import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
@@ -134,6 +135,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 //将收到的验证码和手机号提交再次核对
                 SMSSDK.submitVerificationCode("86", phoneNums, inputCodeEt
                         .getText().toString());
+
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
@@ -187,11 +189,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                         Toast.makeText(getApplicationContext(), "提交验证码成功",
                                 Toast.LENGTH_SHORT).show();
                         Intent intent = new Intent();
-                        intent.putExtra("data_return",inputPhoneEt.getText().toString());
-                        setResult(RESULT_OK,intent);
                         Bundle bundle = new Bundle();
                         bundle.putString("userName",phoneNums);
                         intent.putExtras(bundle);
+                        MyApplication.getInstance().setMoublefhoneUser(inputPhoneEt.getText().toString());
                         finish();
                     } else if (event == SMSSDK.EVENT_GET_VERIFICATION_CODE) {
                         Toast.makeText(getApplicationContext(), "正在获取验证码",
@@ -255,6 +256,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         //存储手机号
         inputText = inputPhoneEt.getText().toString();
         save(inputText);
+        System.out.println("活动毁灭之后是否传值"+MyApplication.getInstance().getMoublefhoneUser());
         System.out.println("活动毁灭之前是否传值"+inputText);
         super.onDestroy();
     }

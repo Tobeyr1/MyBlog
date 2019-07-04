@@ -30,8 +30,10 @@ import android.widget.Toast;
 
 import com.example.frametest.UserMode.LoginActivity;
 import com.example.frametest.UserMode.User;
+import com.example.frametest.UserMode.UserFavoriteActivity;
 import com.example.frametest.UserMode.User_DataActivity;
 import com.example.frametest.tools.DBOpenHelper;
+import com.example.frametest.tools.MyApplication;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -108,31 +110,38 @@ public class MainActivity extends AppCompatActivity {
                 mDrawerLayout.closeDrawers();
                 switch (menuItem.getItemId()) {
                     case R.id.nav_call:
+                        phonenumber = MyApplication.getMoublefhoneUser();
                         //通过判断手机号是否存在，来决定是进入编辑资料页面还是进入登陆页面
                         if (phonenumber != null){
                             Intent unIntent = new Intent(MainActivity.this,User_DataActivity.class);
-                            unIntent.putExtra("user_settings",phonenumber);
-                            startActivityForResult(unIntent,3);
+                            startActivity(unIntent);
                         } else {
                             Intent exitIntent = new Intent(MainActivity.this,LoginActivity.class);
-                            startActivityForResult(exitIntent,2);
+                            startActivity(exitIntent);
                         }
                         break;
                     case R.id.nav_friends:
-                        Toast.makeText(MainActivity.this, "你点击了好友", Toast.LENGTH_SHORT).show();
+                        //
                         break;
                     case R.id.nav_location:
                         Toast.makeText(MainActivity.this, "你点击了发布新闻，下步实现", Toast.LENGTH_SHORT).show();
                         break;
                     case R.id.nav_favorite:
-                        Toast.makeText(MainActivity.this, "你点击了个人收藏，下步实现", Toast.LENGTH_SHORT).show();
+                        phonenumber = MyApplication.getMoublefhoneUser();
+                        if (phonenumber != null){
+                            Intent userFavIntent = new Intent(MainActivity.this,UserFavoriteActivity.class);
+                            startActivity(userFavIntent);
+                        } else {
+                            Intent exitIntent = new Intent(MainActivity.this,LoginActivity.class);
+                            startActivity(exitIntent);
+                        }
                         break;
                     case R.id.nav_settings:
                         Toast.makeText(MainActivity.this,"需要做出登出功能，可扩展夜间模式，离线模式等,检查更新",Toast.LENGTH_LONG).show();
                         break;
                     case R.id.nav_exit:
                         Intent intent = new Intent(MainActivity.this,LoginActivity.class);
-                        startActivityForResult(intent,1);
+                        startActivity(intent);
                         break;
                     default:
                 }
@@ -209,8 +218,15 @@ public class MainActivity extends AppCompatActivity {
         tabLayout.setupWithViewPager(viewPager);
         String inputText = load();
         if (!TextUtils.isEmpty(inputText)){
+            System.out.println("________)))))))");
+            System.out.println("________)))))))");
+            System.out.println(phonenumber);
             phonenumber =inputText;
+            MyApplication.setMoublefhoneUser(phonenumber);
         }
+
+
+
     }
 
     @Override
@@ -225,6 +241,9 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId()){
             //R.id.home修改导航按钮的点击事件为打开侧滑栏
             case android.R.id.home:
+                if (MyApplication.getInstance().getMoublefhoneUser() != null){
+                    phonenumber = MyApplication.getInstance().getMoublefhoneUser();
+                }
                 mDrawerLayout.openDrawer(GravityCompat.START);  //打开侧滑栏
                 tvhuoqu = (TextView) findViewById(R.id.text_huoqu);
                 tvhuoqu.setText(phonenumber);
@@ -281,38 +300,6 @@ public class MainActivity extends AppCompatActivity {
 
         }
         return true;
-    }
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        switch (requestCode){
-            case 1:
-                if (resultCode == RESULT_OK){
-                    String returnedData = data.getStringExtra("data_return");
-                    phonenumber = returnedData;
-                    View v = navigationView.getHeaderView(0);
-                    tvhuoqu = (TextView) v.findViewById(R.id.text_huoqu);
-                    tvhuoqu.setText(phonenumber);
-                    System.out.println("*********");
-                    System.out.println("*********");
-                    System.out.println("手机号获取到的内容+"+phonenumber);
-                }
-                break;
-            case 2:
-                if(resultCode == RESULT_OK){
-                    String returnedData = data.getStringExtra("data_return");
-                    phonenumber = returnedData;
-                }
-                break;
-            case 3:
-                if (requestCode == RESULT_OK){
-                    String retutnName = data.getStringExtra("return_name");
-                    userName = retutnName;
-
-                }
-                break;
-            default:
-        }
-
     }
     public String load() {
         FileInputStream in = null;

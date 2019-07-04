@@ -191,6 +191,7 @@ public class NewsFragment extends Fragment {
                 }).start();
                 Intent intent = new Intent(getActivity(),WebActivity.class);
                 intent.putExtra("url",url);
+                intent.putExtra("uniquekey",uniquekey);
                 startActivity(intent);
 
             }
