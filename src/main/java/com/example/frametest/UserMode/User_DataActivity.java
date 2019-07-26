@@ -31,11 +31,9 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.example.frametest.R;
 import com.example.frametest.tools.DBOpenHelper;
 import com.example.frametest.tools.MyApplication;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -111,7 +109,9 @@ public class User_DataActivity extends AppCompatActivity {
                             public void run() {
                                 input_userName = editText.getText().toString();
                                 if ("".equals(input_userName) || input_userName == null) {
-                                    Message msg = new Message();
+                                    //此处优化
+                                    //
+                                    Message msg = userSettingsHandler.obtainMessage();
                                     msg.what =USER_SETTINGS_NAME;
                                     userSettingsHandler.sendMessage(msg);
                                 } else {
@@ -125,7 +125,9 @@ public class User_DataActivity extends AppCompatActivity {
                                         i = pstmt.executeUpdate();
                                         pstmt.close();
                                         conn.close();
-                                        Message msg = new Message();
+                                        //此处优化
+                                        //
+                                        Message msg = userSettingsHandler.obtainMessage();
                                         msg.what = USER_UPDATE_NAME;
                                         userSettingsHandler.sendMessage(msg);
                                     } catch (SQLException e) {

@@ -94,7 +94,9 @@ public class UserFavoriteActivity extends AppCompatActivity {
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
-                Message msg = new Message();
+                //此处优化
+                //
+                Message msg = newsFavHandler.obtainMessage();
                 msg.what=NewsFav_List;
                 newsFavHandler.sendMessage(msg);
             }

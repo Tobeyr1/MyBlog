@@ -24,7 +24,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -261,7 +260,9 @@ public class MainActivity extends AppCompatActivity {
                             while (rs.next()){
                                 User user = new User();
                                 user.setUser_name(rs.getString(1));
-                                Message msg = new Message();
+                                //此处优化方法，去掉以前的new Message()这样会不断地新增一个Handle增加内存空间响应时间
+                                //
+                                Message msg = userFeedHandler.obtainMessage();
                                 msg.what=USER_LOOK_NAME;
                                 msg.obj = user;
                                 userFeedHandler.sendMessage(msg);

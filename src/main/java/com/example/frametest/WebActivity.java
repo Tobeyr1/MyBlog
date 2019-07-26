@@ -120,7 +120,7 @@ public class WebActivity extends AppCompatActivity {
                             }).start();
                         } else {
                             Intent exitIntent = new Intent(WebActivity.this,LoginActivity.class);
-                            startActivityForResult(exitIntent,4);
+                            startActivity(exitIntent);
                         }
                         break;
                 }
@@ -133,22 +133,7 @@ public class WebActivity extends AppCompatActivity {
             actionBar.setHomeAsUpIndicator(R.drawable.ic_chevron_left);
         }
     }
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        switch (requestCode){
-            case 4:
-                if (resultCode == RESULT_OK){
-                    String returnedData = data.getStringExtra("data_return");
-                    user_phonenumber =returnedData;
-                    if (returnedData != null){
-                    }else {
-                        Toast.makeText(this,"登陆失败",Toast.LENGTH_SHORT).show();
-                    }
-                }
-                break;
-            default:
-        }
-    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.toolbar_webview,menu);
