@@ -72,13 +72,11 @@ public class UserFavoriteActivity extends AppCompatActivity {
             public void run() {
                 Connection conn = null;
                 conn = (Connection) DBOpenHelper.getConn();
-                String sql = "select title,url from news_info where uniquekey in(  select news_id from user_collect  where user_phone = ?)";
+                //这里优化子查询
+                String sql = "select title,url from news_info LEFT JOIN user_collect on news_info.uniquekey=user_collect.news_id where user_collect.user_phone= ?";
                 PreparedStatement pstmt;
                 try {
                     String  num = phone_userfavorite;
-                    System.out.println("^^^^^^^^^");
-                    System.out.println("^^^^^^^^^");
-                    System.out.println("huoqu手机号内容是"+num);
                     pstmt = (PreparedStatement) conn.prepareStatement(sql);
                     pstmt.setString(1,num);
                     ResultSet rs = pstmt.executeQuery();

@@ -26,16 +26,18 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".MainActivity">
+        </activity>
+        <activity android:name=".WebActivity" />
+        <activity android:name=".UserMode.LoginActivity" />
+        <activity android:name=".UserMode.User_DataActivity" />
+        <activity android:name=".UserMode.UserFavoriteActivity" />
+        <activity android:name=".UserMode.SplashActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".WebActivity" />
-        <activity android:name=".UserMode.LoginActivity" />
-        <activity android:name=".UserMode.User_DataActivity" />
-        <activity android:name=".UserMode.UserFavoriteActivity"></activity>
     </application>
 
 </manifest>
