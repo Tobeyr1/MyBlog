@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -13,8 +12,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
 import com.example.frametest.R;
+import com.example.frametest.tools.BasicActivity;
 import com.example.frametest.tools.DBOpenHelper;
 import com.example.frametest.tools.MyApplication;
 import com.mob.MobSDK;
@@ -30,7 +29,7 @@ import cn.smssdk.EventHandler;
 import cn.smssdk.SMSSDK;
 
 
-public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
+public class LoginActivity extends BasicActivity implements View.OnClickListener {
     String APPKEY = "2b85a17d997b2";
     String APPSECRET = "bc386e05d6171e915f1195858a9d017b";
     String phoneNums;
@@ -135,37 +134,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 //将收到的验证码和手机号提交再次核对
                 SMSSDK.submitVerificationCode("86", phoneNums, inputCodeEt
                         .getText().toString());
-
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Connection conn = null;
-                        conn = (Connection) DBOpenHelper.getConn();
-                        String sql = "insert into user_info(user_phone) values(?)";
-                        int i = 0;
-                        String id=null;
-                        String user_name=null;
-                        String user_phone=null;
-                        String user_pasw=null;
-                        PreparedStatement pstmt;
-
-                        try {
-                            User user = new User();
-                            pstmt = (PreparedStatement) conn.prepareStatement(sql);
-                            pstmt.setString(1,phoneNums);
-                            i = pstmt.executeUpdate();
-                            user.setUser_phone(user_phone);
-                            Message message = new Message();
-                            message.what = UPDATE_INSERT;
-                            message.obj = user;
-                            userHandler.sendMessage(message);
-                            pstmt.close();
-                            conn.close();
-                        } catch (SQLException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }).start();
                 break;
         }
     }
@@ -189,10 +157,27 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                         Toast.makeText(getApplicationContext(), "提交验证码成功",
                                 Toast.LENGTH_SHORT).show();
                         Intent intent = new Intent();
-                        Bundle bundle = new Bundle();
-                        bundle.putString("userName",phoneNums);
-                        intent.putExtras(bundle);
-                        MyApplication.getInstance().setMoublefhoneUser(inputPhoneEt.getText().toString());
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                String regist_user = inputPhoneEt.getText().toString();
+                                System.out.println("插入到数据库中的手机号是否为空"+regist_user);
+                                Connection conn = null;
+                                conn = (Connection) DBOpenHelper.getConn();
+                                String sql = "insert into user_info (user_phone)values('"+regist_user+"')";
+                                PreparedStatement pst;
+                                int i =1;
+                                try {
+                                    pst = (PreparedStatement) conn.prepareStatement(sql);
+                                    i = pst.executeUpdate();
+                                    pst.close();
+                                    conn.close();
+                                } catch (SQLException e) {
+                                    e.printStackTrace();
+                                }
+                                MyApplication.getInstance().setMoublefhoneUser(inputPhoneEt.getText().toString());
+                            }
+                        }).start();
                         finish();
                     } else if (event == SMSSDK.EVENT_GET_VERIFICATION_CODE) {
                         Toast.makeText(getApplicationContext(), "正在获取验证码",

@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -14,13 +13,12 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
-
 import com.example.frametest.R;
 import com.example.frametest.WebActivity;
 import com.example.frametest.json.NewsBean;
+import com.example.frametest.tools.BasicActivity;
 import com.example.frametest.tools.DBOpenHelper;
 import com.example.frametest.tools.MyApplication;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -28,7 +26,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UserFavoriteActivity extends AppCompatActivity {
+public class UserFavoriteActivity extends BasicActivity {
     private ListView listView;
     private List<NewsBean.ResultBean.DataBean> newList = new ArrayList<>();
     NewsBean.ResultBean.DataBean dataBean;

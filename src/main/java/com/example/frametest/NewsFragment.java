@@ -35,6 +35,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+
 public class NewsFragment extends Fragment {
     private FloatingActionButton fab;
     private ListView listView;
@@ -43,6 +47,7 @@ public class NewsFragment extends Fragment {
     private static final int UPNEWS_INSERT = 0;
     private int page =0,row =10;
     private static final int SELECT_REFLSH = 1;
+    String  responseDate;
     @SuppressLint("HandlerLeak")
     private Handler newsHandler = new Handler(){
         @Override
@@ -80,7 +85,6 @@ public class NewsFragment extends Fragment {
         swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh);
         return view;
     }
-
     @SuppressLint("HandlerLeak")
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
@@ -198,91 +202,57 @@ public class NewsFragment extends Fragment {
         });
     }
     private void getDataFromNet(final String data){
-        @SuppressLint("StaticFieldLeak") AsyncTask<Void,Void,String> task = new AsyncTask<Void, Void, String>() {
+        final String path = "http://v.juhe.cn/toutiao/index?type="+data+"&key=547ee75ef186fc55a8f015e38dcfdb9a";
+        new Thread(new Runnable() {
             @Override
-            protected String doInBackground(Void... params) {
-                String path = "http://v.juhe.cn/toutiao/index?type="+data+"&key=547ee75ef186fc55a8f015e38dcfdb9a";
-                URL url = null;
+            public void run() {
+                OkHttpClient okHttpClient = new OkHttpClient();
+                Request request = new Request.Builder()
+                        .url(path)
+                        .build();
                 try {
-                    url = new URL(path);
-                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                    connection.setRequestMethod("GET");
-                    connection.setReadTimeout(5000);
-                    connection.setConnectTimeout(5000);
-
-                    int responseCode = connection.getResponseCode();
-                    if (responseCode == 200){
-                        InputStream inputStream = connection.getInputStream();
-                        String json = streamToString(inputStream,"utf-8");
-                        return json;
-                    } else {
-                        System.out.println(responseCode);
-                        return "已达到今日访问次数上限";
+                    Response response = okHttpClient.newCall(request).execute();
+                    responseDate = response.body().string();
+                    NewsBean newsBean = new Gson().fromJson(responseDate, NewsBean.class);
+                    if ("10012".equals("" + newsBean.getError_code())) {
+                        List<NewsBean.ResultBean.DataBean> listDataBean = new ArrayList<>();
+                        Connection conn = null;
+                        conn = (Connection) DBOpenHelper.getConn();
+                        String sql = "select * from news_info ";
+                        PreparedStatement pstmt;
+                        pstmt = (PreparedStatement) conn.prepareStatement(sql);
+                        ResultSet rs = pstmt.executeQuery();
+                        while (rs.next()) {
+                            NewsBean.ResultBean.DataBean dataBean = new NewsBean.ResultBean.DataBean();
+                            dataBean.setUniquekey(rs.getString(1));
+                            dataBean.setTitle(rs.getString(2));
+                            dataBean.setDate(rs.getString(3));
+                            dataBean.setCategory(rs.getString(4));
+                            dataBean.setAuthor_name(rs.getString(5));
+                            dataBean.setUrl(rs.getString(6));
+                            dataBean.setThumbnail_pic_s(rs.getString(7));
+                            dataBean.setThumbnail_pic_s02(rs.getString(8));
+                            dataBean.setThumbnail_pic_s03(rs.getString(9));
+                            listDataBean.add(dataBean);
+                        }
+                        newsBean.setResult(new NewsBean.ResultBean());
+                        newsBean.getResult().setData(listDataBean);
+                        pstmt.close();
+                        conn.close();
                     }
-
-                } catch (MalformedURLException e) {
-                    e.printStackTrace();
-                } catch (ProtocolException e) {
-                    e.printStackTrace();
+                    Message msg = newsHandler.obtainMessage();
+                    msg.what = UPNEWS_INSERT;
+                    msg.obj = newsBean;
+                    newsHandler.sendMessage(msg);
                 } catch (IOException e) {
                     e.printStackTrace();
+                } catch (SQLException e) {
+                    e.printStackTrace();
                 }
-                return "";
-            }
-            protected void onPostExecute(final String result){
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        NewsBean newsBean = new Gson().fromJson(result,NewsBean.class);
-                        System.out.println(newsBean.getError_code());
-                        //打印输出看一下当达到每日访问次数上限时出现的错误code，发现为10012
-                        if ("10012".equals(""+newsBean.getError_code())){
-                            //这里通过判断error_code来决定是否查询new_info表中的数据来填充到listview的适配器中
-                            List<NewsBean.ResultBean.DataBean> listDataBean = new ArrayList<>();
-                            Connection conn = null;
-                            conn = (Connection) DBOpenHelper.getConn();
-                            String sql = "select * from news_info ";
-                            PreparedStatement pstmt;
-                            try {
-                                pstmt = (PreparedStatement) conn.prepareStatement(sql);
-                                ResultSet rs = pstmt.executeQuery();
-                                while (rs.next()){
-                                    NewsBean.ResultBean.DataBean dataBean = new NewsBean.ResultBean.DataBean();
-                                    dataBean.setUniquekey(rs.getString(1));
-                                    dataBean.setTitle(rs.getString(2));
-                                    dataBean.setDate(rs.getString(3));
-                                    dataBean.setCategory(rs.getString(4));
-                                    dataBean.setAuthor_name(rs.getString(5));
-                                    dataBean.setUrl(rs.getString(6));
-                                    dataBean.setThumbnail_pic_s(rs.getString(7));
-                                    dataBean.setThumbnail_pic_s02(rs.getString(8));
-                                    dataBean.setThumbnail_pic_s03(rs.getString(9));
-                                    listDataBean.add(dataBean);
 
+            }
 
-                                }
-                                newsBean.setResult(new NewsBean.ResultBean());
-                                newsBean.getResult().setData(listDataBean);
-                                pstmt.close();
-                                conn.close();
-                                System.out.println(newsBean.getResult().getData());
-                            } catch (SQLException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                        Message msg=newsHandler.obtainMessage();
-                        msg.what=UPNEWS_INSERT;
-                        msg.obj = newsBean;
-                        newsHandler.sendMessage(msg);
-                    }
-                }).start();
-            }
-            @Override
-            protected void onProgressUpdate(Void... values) {
-                super.onProgressUpdate(values);
-            }
-        };
-        task.execute();
+        }).start();
     }
 
     private String streamToString(InputStream inputStream, String charset){

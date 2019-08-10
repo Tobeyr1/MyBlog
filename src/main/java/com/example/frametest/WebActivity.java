@@ -1,12 +1,13 @@
 package com.example.frametest;
 
+import android.annotation.SuppressLint;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.net.http.SslError;
-import android.support.annotation.Nullable;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -17,19 +18,39 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.SearchView;
 import android.widget.Toast;
-
 import com.example.frametest.UserMode.LoginActivity;
+import com.example.frametest.json.NewsBean;
+import com.example.frametest.tools.BasicActivity;
 import com.example.frametest.tools.DBOpenHelper;
 import com.example.frametest.tools.MyApplication;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
-public class WebActivity extends AppCompatActivity {
+public class WebActivity extends BasicActivity {
     private WebView webView;
     private Toolbar toolbar,ltoolBar;
+    private final  static int SEARCH_MOHU =1;
     String url,user_phonenumber;
+    private boolean flags=true;
+    private List<NewsBean.ResultBean.DataBean> list;
+    @SuppressLint("HandlerLeak")
+    private Handler searchHandler = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+           switch (msg.what){
+               case SEARCH_MOHU:
+                   list = ((NewsBean) msg.obj).getResult().getData();
+
+                   System.out.println("*&*&*&*&*&*&*&*&");
+                   System.out.println(list.size());
+                   break;
+           }
+        }
+    };
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,7 +60,6 @@ public class WebActivity extends AppCompatActivity {
         toolbar = (Toolbar) findViewById(R.id.toolbar_webview);
         ltoolBar = (Toolbar) findViewById(R.id.toolbar_webcomment);
         findViewById(R.id.toolbar_webcomment).bringToFront();
-
     }
 
     @Override
@@ -96,6 +116,8 @@ public class WebActivity extends AppCompatActivity {
                         //下一步实现点击收藏功能，以及用户查看收藏功能
                       user_phonenumber = MyApplication.getInstance().getMoublefhoneUser();
                         if (user_phonenumber != null){
+                            if (flags){
+                            flags = !flags;
                             Toast.makeText(WebActivity.this,"收藏成功",Toast.LENGTH_SHORT).show();
                             new Thread(new Runnable() {
                                 @Override
@@ -118,6 +140,9 @@ public class WebActivity extends AppCompatActivity {
                                     }
                                 }
                             }).start();
+                            }else {
+                                Toast.makeText(WebActivity.this,"您已经收藏过啦",Toast.LENGTH_SHORT).show();
+                            }
                         } else {
                             Intent exitIntent = new Intent(WebActivity.this,LoginActivity.class);
                             startActivity(exitIntent);
@@ -137,14 +162,44 @@ public class WebActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.toolbar_webview,menu);
-        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        final SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         SearchView searchView = (SearchView) menu.findItem(R.id.news_search).getActionView();
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
-            public boolean onQueryTextSubmit(String query) {
-                Toast.makeText(WebActivity.this,query,Toast.LENGTH_SHORT).show();
-                return false;
+            public boolean onQueryTextSubmit(final String query) {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        NewsBean newsBean = new NewsBean();
+                        List<NewsBean.ResultBean.DataBean> dataBeanList = new ArrayList<>();
+                        Connection conn = null;
+                        conn = DBOpenHelper.getConn();
+                        String sql ="select title from news_info where  match(title,category) AGAINST ('"+query+"' IN BOOLEAN MODE )";
+                        PreparedStatement pst;
+                        try {
+                            pst =(PreparedStatement) conn.prepareStatement(sql);
+                            ResultSet rs = pst.executeQuery();
+                            while (rs.next()){
+                                NewsBean.ResultBean.DataBean dataBean = new NewsBean.ResultBean.DataBean();
+                                dataBean.setTitle(rs.getString(1));
+                                dataBeanList.add(dataBean);
+                            }
+                            newsBean.setResult(new NewsBean.ResultBean());
+                            newsBean.getResult().setData(dataBeanList);
+                            pst.close();
+                            conn.close();
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
+                        Message msg = searchHandler.obtainMessage();
+                        msg.what = SEARCH_MOHU;
+                        msg.obj = newsBean;
+                        searchHandler.sendMessage(msg);
+                    }
+
+                }).start();
+                return true;
             }
 
             @Override

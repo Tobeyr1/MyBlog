@@ -22,7 +22,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
@@ -32,13 +31,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.example.frametest.R;
+import com.example.frametest.tools.BasicActivity;
 import com.example.frametest.tools.DBOpenHelper;
 import com.example.frametest.tools.MyApplication;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-public class User_DataActivity extends AppCompatActivity {
+public class User_DataActivity extends BasicActivity {
     private ImageView imageView_user;
     public static final int CHOOSE_USER_TOUX =11;
     public static final int USER_SETTINGS_NAME =12;

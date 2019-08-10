@@ -1,21 +1,19 @@
 package com.example.frametest.TabAdapter;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-
-
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.RequestOptions;
 import com.example.frametest.R;
 import com.example.frametest.json.NewsBean;
+import com.example.frametest.tools.GlideUtil;
 import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
-import com.nostra13.universalimageloader.core.assist.ImageScaleType;
-
 import java.util.List;
 
 public class MyTabAdapter extends BaseAdapter {
@@ -85,7 +83,12 @@ public class MyTabAdapter extends BaseAdapter {
             //获取数据重新赋值
             holder.title.setText(list.get(position).getTitle());
             holder.author_name.setText(list.get(position).getAuthor_name());
-            ImageLoader.getInstance().displayImage(list.get(position).getThumbnail_pic_s(),holder.image,getOption());
+            RequestOptions options = new RequestOptions()
+                    .placeholder(R.mipmap.ic_launcher)
+                    .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+                    .error(R.mipmap.ic_launcher);
+            GlideUtil.load(context,list.get(position).getThumbnail_pic_s(),holder.image,options);
+           // Glide.with(context).load(list.get(position).getThumbnail_pic_s()).apply(options).into(holder.image);
         }else if (getItemViewType(position) == IMAGE_02){
             Image02_ViewHolder holder;
             if (convertView == null){
@@ -103,8 +106,14 @@ public class MyTabAdapter extends BaseAdapter {
 
             //获取数据重新赋值
             holder.title.setText(list.get(position).getTitle());
-            ImageLoader.getInstance().displayImage(list.get(position).getThumbnail_pic_s(),holder.image001,getOption());
-            ImageLoader.getInstance().displayImage(list.get(position).getThumbnail_pic_s02(),holder.image002,getOption());
+            RequestOptions options = new RequestOptions()
+                    .placeholder(R.mipmap.ic_launcher)
+                    .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+                    .error(R.mipmap.ic_launcher);
+            GlideUtil.load(context,list.get(position).getThumbnail_pic_s(),holder.image001,options);
+            GlideUtil.load(context,list.get(position).getThumbnail_pic_s02(),holder.image002,options);
+            //Glide.with(context).load(list.get(position).getThumbnail_pic_s()).apply(options).into(holder.image001);
+           // Glide.with(context).load(list.get(position).getThumbnail_pic_s02()).apply(options).into(holder.image002);
         } else {
             Image03_ViewHolder holder;
             if (convertView == null){
@@ -123,27 +132,18 @@ public class MyTabAdapter extends BaseAdapter {
 
             //获取数据重新赋值
             holder.title.setText(list.get(position).getTitle());
-            ImageLoader.getInstance().displayImage(list.get(position).getThumbnail_pic_s(),holder.image01,getOption());
-            ImageLoader.getInstance().displayImage(list.get(position).getThumbnail_pic_s02(),holder.image02,getOption());
-            ImageLoader.getInstance().displayImage(list.get(position).getThumbnail_pic_s03(),holder.image03,getOption());
+            RequestOptions options = new RequestOptions()
+                    .placeholder(R.mipmap.ic_launcher)
+                    .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+                    .error(R.mipmap.ic_launcher);
+            GlideUtil.load(context,list.get(position).getThumbnail_pic_s(),holder.image01,options);
+            GlideUtil.load(context,list.get(position).getThumbnail_pic_s02(),holder.image02,options);
+            GlideUtil.load(context,list.get(position).getThumbnail_pic_s03(),holder.image03,options);
+            //Glide.with(context).load(list.get(position).getThumbnail_pic_s()).apply(options).into(holder.image01);
+           // Glide.with(context).load(list.get(position).getThumbnail_pic_s02()).apply(options).into(holder.image02);
+           // Glide.with(context).load(list.get(position).getThumbnail_pic_s03()).apply(options).into(holder.image03);
         }
         return convertView;
-    }
-    //配置图片加载失败和加载中显示的Android小机器人logo
-    public static DisplayImageOptions getOption() {
-        DisplayImageOptions options = new DisplayImageOptions.Builder()
-                .showImageOnLoading(R.mipmap.ic_launcher) // 设置图片下载期间显示的图片
-                .showImageForEmptyUri(R.mipmap.ic_launcher) // 设置图片Uri为空或是错误的时候显示的图片
-                .showImageOnFail(R.mipmap.ic_launcher) // 设置图片加载或解码过程中发生错误显示的图片
-                .resetViewBeforeLoading(true)  // default 设置图片在加载前是否重置、复位
-                .delayBeforeLoading(1000)  // 下载前的延迟时间
-                .cacheInMemory(true) // default  设置下载的图片是否缓存在内存中
-                .cacheOnDisk(true) // default  设置下载的图片是否缓存在SD卡中
-                .imageScaleType(ImageScaleType.EXACTLY_STRETCHED) // default 设置图片以如何的编码方式显示
-                .bitmapConfig(Bitmap.Config.RGB_565) // default 设置图片的解码类型
-                .build();
-
-        return options;
     }
 
     static  class  Image01_ViewHolder{

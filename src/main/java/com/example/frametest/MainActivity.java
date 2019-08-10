@@ -16,7 +16,6 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.Menu;
@@ -26,14 +25,15 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.example.frametest.UserMode.LoginActivity;
 import com.example.frametest.UserMode.User;
 import com.example.frametest.UserMode.UserFavoriteActivity;
 import com.example.frametest.UserMode.User_DataActivity;
+import com.example.frametest.UserMode.User_LogoutActivity;
+import com.example.frametest.tools.ActivityCollector;
+import com.example.frametest.tools.BasicActivity;
 import com.example.frametest.tools.DBOpenHelper;
 import com.example.frametest.tools.MyApplication;
-
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -46,9 +46,11 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BasicActivity {
     private android.support.v7.widget.Toolbar toolbar;
     private DrawerLayout mDrawerLayout;
     private NavigationView navigationView;
@@ -58,6 +60,9 @@ public class MainActivity extends AppCompatActivity {
     private TextView tvhuoqu,tvName;
     String phonenumber,userName;
     private static final int USER_LOOK_NAME = 0;
+    private static final int USER_FEEDBACK = 1;
+    private static final int USER_ISNULL = 2;
+    private static boolean mBackKeyPressed = false;//记录是否有首次按键
     @SuppressLint("HandlerLeak")
     private Handler userFeedHandler = new Handler(){
         @Override
@@ -70,6 +75,13 @@ public class MainActivity extends AppCompatActivity {
                     tvName = (TextView) findViewById(R.id.text_username);
                     tvName.setText(user_name);
                     break;
+                case USER_FEEDBACK:
+                    Toast.makeText(MainActivity.this,"反馈信息不能为空或不存在！",Toast.LENGTH_SHORT).show();
+                    break;
+                case USER_ISNULL:
+                    Toast.makeText(MainActivity.this,"用户未登录！",Toast.LENGTH_SHORT).show();
+                    break;
+                    default:
             }
         }
     };
@@ -136,7 +148,9 @@ public class MainActivity extends AppCompatActivity {
                         }
                         break;
                     case R.id.nav_settings:
-                        Toast.makeText(MainActivity.this,"需要做出登出功能，可扩展夜间模式，离线模式等,检查更新",Toast.LENGTH_LONG).show();
+                        Intent logoutIntent = new Intent(MainActivity.this,User_LogoutActivity.class);
+                        startActivity(logoutIntent);
+                        Toast.makeText(MainActivity.this,"需要做出注销功能，可扩展夜间模式，离线模式等,检查更新",Toast.LENGTH_LONG).show();
                         break;
                     case R.id.nav_exit:
                         Intent intent = new Intent(MainActivity.this,LoginActivity.class);
@@ -284,7 +298,38 @@ public class MainActivity extends AppCompatActivity {
                 dialog.setPositiveButton("确认", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                       //添加点击事件
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                String input_text = ed.getText().toString();
+                                if ("".equals(MyApplication.getMoublefhoneUser()) || MyApplication.getMoublefhoneUser() == null) {
+                                    Message msg = Message.obtain();
+                                    msg.what =USER_ISNULL;
+                                    userFeedHandler.sendMessage(msg);
+                                } else if ("".equals(input_text) || input_text == null) {
+                                    Message msg = Message.obtain();
+                                    msg.what =USER_FEEDBACK;
+                                    userFeedHandler.sendMessage(msg);
+                                }else {
+                                    Connection conn = null;
+                                    conn = (Connection) DBOpenHelper.getConn();
+                                    String sql = "insert into user_feedback(user_feed,user_phone) values(?,?)";
+                                    int i = 0;
+                                    PreparedStatement pstmt;
+                                    try {
+                                        pstmt = (PreparedStatement) conn.prepareStatement(sql);
+                                        pstmt.setString(1, input_text);
+                                        pstmt.setString(2,MyApplication.getMoublefhoneUser());
+                                        i = pstmt.executeUpdate();
+                                        pstmt.close();
+                                        conn.close();
+                                    } catch (SQLException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }
+                        }).start();
+                        Toast.makeText(MainActivity.this,"反馈成功",Toast.LENGTH_SHORT).show();
                     }
                 });
                 dialog.setNegativeButton("取消", new DialogInterface.OnClickListener() {
@@ -295,7 +340,22 @@ public class MainActivity extends AppCompatActivity {
                 dialog.show();
                 break;
             case R.id.userExit:
-                Toast.makeText(this,"ni click 退出",Toast.LENGTH_SHORT).show();
+                AlertDialog.Builder dia = new AlertDialog.Builder(MainActivity.this);
+                dia.setTitle("Warning");
+                dia.setMessage("是否推出程序？");
+                dia.setCancelable(false);
+                dia.setPositiveButton("确认", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        ActivityCollector.finishAll();
+                    }
+                });
+                dia.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                });
+                dia.show();
                 break;
             default:
 
@@ -328,5 +388,23 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         return content.toString();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(!mBackKeyPressed){
+            Toast.makeText(this, "再按一次退出程序", Toast.LENGTH_SHORT).show();
+            mBackKeyPressed = true;
+            new Timer().schedule(new TimerTask() {//延时两秒，如果超出则擦错第一次按键记录
+                @Override
+                public void run() {
+                    mBackKeyPressed = false;
+                }
+            }, 2000);
+        }
+        else{//退出程序
+            this.finish();
+            System.exit(0);
+        }
     }
 }
