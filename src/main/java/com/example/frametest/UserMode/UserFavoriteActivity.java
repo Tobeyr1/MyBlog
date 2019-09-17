@@ -1,6 +1,7 @@
 package com.example.frametest.UserMode;
 
 import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
@@ -18,6 +19,7 @@ import com.example.frametest.WebActivity;
 import com.example.frametest.json.NewsBean;
 import com.example.frametest.tools.BasicActivity;
 import com.example.frametest.tools.DBOpenHelper;
+import com.example.frametest.tools.DialogUtil;
 import com.example.frametest.tools.MyApplication;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -33,6 +35,7 @@ public class UserFavoriteActivity extends BasicActivity {
     String phone_userfavorite;
     private static final int NewsFav_List = 6;
     private TextView textView;
+    Dialog mDialog;
     @SuppressLint("HandlerLeak")
     private Handler newsFavHandler = new Handler(){
         @Override
@@ -43,6 +46,7 @@ public class UserFavoriteActivity extends BasicActivity {
                     Log.d("传入数据后", String.valueOf(newList.size()));
                     listView.setAdapter(adapter);
                     adapter.notifyDataSetChanged();
+                    DialogUtil.closeDialog(mDialog);
                     break;
             }
         }
@@ -97,7 +101,7 @@ public class UserFavoriteActivity extends BasicActivity {
                 newsFavHandler.sendMessage(msg);
             }
         }).start();
-
+        mDialog = DialogUtil.createLoadingDialog(UserFavoriteActivity.this,"加载中...");
     }
 
     @SuppressLint("MissingSuperCall")

@@ -11,4 +11,25 @@
         <item name="android:windowNoTitle">true</item>
     </style>
 
+    <!-- my loading dialog -->
+    <style name="MyDialogStyle" parent="Animation.AppCompat.Dialog">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowFrame">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
+        <item name="android:backgroundDimEnabled">false</item>
+
+    </style>
+    <!-- popup window-->
+    <style name="PopWindowAnimStyle">
+        <item name="android:windowShowAnimation">@anim/dialog_enter</item>
+
+        <item name="android:windowHideAnimation">@anim/dialog_exit</item>
+
+    </style>
+
+
 </resources>

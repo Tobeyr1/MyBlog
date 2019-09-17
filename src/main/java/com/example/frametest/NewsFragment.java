@@ -1,6 +1,7 @@
 package com.example.frametest;
 
 import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -19,6 +20,7 @@ import android.widget.ListView;
 import com.example.frametest.json.NewsBean;
 import com.example.frametest.TabAdapter.MyTabAdapter;
 import com.example.frametest.tools.DBOpenHelper;
+import com.example.frametest.tools.DialogUtil;
 import com.google.gson.Gson;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -48,6 +50,7 @@ public class NewsFragment extends Fragment {
     private int page =0,row =10;
     private static final int SELECT_REFLSH = 1;
     String  responseDate;
+    Dialog mDialog;
     @SuppressLint("HandlerLeak")
     private Handler newsHandler = new Handler(){
         @Override
@@ -59,12 +62,17 @@ public class NewsFragment extends Fragment {
                     MyTabAdapter adapter = new MyTabAdapter(getActivity(),list);
                     listView.setAdapter(adapter);
                     adapter.notifyDataSetChanged();
+
                     break;
                 case SELECT_REFLSH:
                     list =((NewsBean) msg.obj).getResult().getData();
                     MyTabAdapter myTabAdapter = new MyTabAdapter(getActivity(),list);
                     listView.setAdapter(myTabAdapter);
                     myTabAdapter.notifyDataSetChanged();
+                    if (swipeRefreshLayout.isRefreshing()){
+                        swipeRefreshLayout.setRefreshing(false);//设置不刷新
+                        DialogUtil.closeDialog(mDialog);
+                    }
                     break;
                     default:
             }
@@ -106,10 +114,7 @@ public class NewsFragment extends Fragment {
             @Override
             public void onRefresh() {
                 page++;
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        swipeRefreshLayout.setRefreshing(false);
+
                       // 下一步实现从数据库中读取数据刷新到listview适配器中
                         new Thread(new Runnable() {
                             @Override
@@ -150,9 +155,8 @@ public class NewsFragment extends Fragment {
                                 newsHandler.sendMessage(msg);
                             }
                         }).start();
+                        mDialog = DialogUtil.createLoadingDialog(getActivity(),"加载中...");
                     }
-                },1000);
-            }
         });
 
         //异步加载数据

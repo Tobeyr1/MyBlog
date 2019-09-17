@@ -1,9 +1,11 @@
 package com.example.frametest;
 
 import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.http.SslError;
 import android.os.Handler;
 import android.os.Message;
@@ -22,7 +24,10 @@ import com.example.frametest.UserMode.LoginActivity;
 import com.example.frametest.json.NewsBean;
 import com.example.frametest.tools.BasicActivity;
 import com.example.frametest.tools.DBOpenHelper;
+import com.example.frametest.tools.DialogUtil;
 import com.example.frametest.tools.MyApplication;
+import com.example.frametest.tools.ToastUtil;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -37,6 +42,7 @@ public class WebActivity extends BasicActivity {
     String url,user_phonenumber;
     private boolean flags=true;
     private List<NewsBean.ResultBean.DataBean> list;
+    private Dialog mDialog;
     @SuppressLint("HandlerLeak")
     private Handler searchHandler = new Handler(){
         @Override
@@ -71,11 +77,18 @@ public class WebActivity extends BasicActivity {
         WebSettings settings = webView.getSettings();
         webView.setWebViewClient(new WebViewClient(){
             @Override
+            public void onPageStarted(WebView view, String url, Bitmap favicon) {
+                super.onPageStarted(view, url, favicon);
+                mDialog = DialogUtil.createLoadingDialog(WebActivity.this,"加载中...");
+            }
+
+            @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view,url );
                 view.loadUrl("javascript:function setTop(){document.querySelector('body > div.top-wrap.gg-item.J-gg-item').style.display=\"none\";}setTop();");
-
+                DialogUtil.closeDialog(mDialog);
             }
+
 
             public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error){
 
@@ -141,7 +154,7 @@ public class WebActivity extends BasicActivity {
                                 }
                             }).start();
                             }else {
-                                Toast.makeText(WebActivity.this,"您已经收藏过啦",Toast.LENGTH_SHORT).show();
+                                ToastUtil.showShortToastCenter(WebActivity.this,"您已经收藏过啦");
                             }
                         } else {
                             Intent exitIntent = new Intent(WebActivity.this,LoginActivity.class);

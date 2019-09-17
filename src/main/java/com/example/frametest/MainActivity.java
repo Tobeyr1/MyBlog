@@ -440,54 +440,6 @@ public class MainActivity extends BasicActivity {
                                 }).start();
                             }
                         }).positiveText("确定").negativeText("取消").show();
-               /* final EditText ed =new EditText(MainActivity.this);
-                AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);
-                dialog.setTitle("用户反馈");
-                dialog.setView(ed);
-                dialog.setCancelable(false);
-                dialog.setPositiveButton("确认", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                String input_text = ed.getText().toString();
-                                if ("".equals(MyApplication.getMoublefhoneUser()) || MyApplication.getMoublefhoneUser() == null) {
-                                    Message msg = Message.obtain();
-                                    msg.what =USER_ISNULL;
-                                    userFeedHandler.sendMessage(msg);
-                                } else if ("".equals(input_text) || input_text == null) {
-                                    Message msg = Message.obtain();
-                                    msg.what =USER_FEEDBACK;
-                                    userFeedHandler.sendMessage(msg);
-                                }else {
-                                    Connection conn = null;
-                                    conn = (Connection) DBOpenHelper.getConn();
-                                    String sql = "insert into user_feedback(user_feed,user_phone) values(?,?)";
-                                    int i = 0;
-                                    PreparedStatement pstmt;
-                                    try {
-                                        pstmt = (PreparedStatement) conn.prepareStatement(sql);
-                                        pstmt.setString(1, input_text);
-                                        pstmt.setString(2,MyApplication.getMoublefhoneUser());
-                                        i = pstmt.executeUpdate();
-                                        pstmt.close();
-                                        conn.close();
-                                    } catch (SQLException e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                            }
-                        }).start();
-                        Toast.makeText(MainActivity.this,"反馈成功",Toast.LENGTH_SHORT).show();
-                    }
-                });
-                dialog.setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                    }
-                });
-                dialog.show();*/
                 break;
             case R.id.userExit:
                 final SweetAlertDialog mDialog = new SweetAlertDialog(MainActivity.this,SweetAlertDialog.NORMAL_TYPE)
