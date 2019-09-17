@@ -17,14 +17,21 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.os.Bundle;
+import android.text.InputType;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.afollestad.materialdialogs.MaterialDialog;
+import com.bumptech.glide.Glide;
+import com.cazaea.sweetalert.SweetAlertDialog;
 import com.example.frametest.UserMode.LoginActivity;
 import com.example.frametest.UserMode.User;
 import com.example.frametest.UserMode.UserFavoriteActivity;
@@ -34,6 +41,11 @@ import com.example.frametest.tools.ActivityCollector;
 import com.example.frametest.tools.BasicActivity;
 import com.example.frametest.tools.DBOpenHelper;
 import com.example.frametest.tools.MyApplication;
+import com.google.gson.Gson;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -49,6 +61,11 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import de.hdodenhof.circleimageview.CircleImageView;
+import interfaces.heweather.com.interfacesmodule.bean.Lang;
+import interfaces.heweather.com.interfacesmodule.bean.Unit;
+import interfaces.heweather.com.interfacesmodule.bean.air.now.AirNow;
+import interfaces.heweather.com.interfacesmodule.bean.weather.now.Now;
+import interfaces.heweather.com.interfacesmodule.view.HeWeather;
 
 public class MainActivity extends BasicActivity {
     private android.support.v7.widget.Toolbar toolbar;
@@ -63,6 +80,8 @@ public class MainActivity extends BasicActivity {
     private static final int USER_FEEDBACK = 1;
     private static final int USER_ISNULL = 2;
     private static boolean mBackKeyPressed = false;//记录是否有首次按键
+    private TextView tv_tianqi,tv_kongqi,tv_airqlty;
+    ImageView image_weather,image_exit;
     @SuppressLint("HandlerLeak")
     private Handler userFeedHandler = new Handler(){
         @Override
@@ -76,12 +95,13 @@ public class MainActivity extends BasicActivity {
                     tvName.setText(user_name);
                     break;
                 case USER_FEEDBACK:
-                    Toast.makeText(MainActivity.this,"反馈信息不能为空或不存在！",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this,"反馈成功",Toast.LENGTH_SHORT).show();
                     break;
                 case USER_ISNULL:
                     Toast.makeText(MainActivity.this,"用户未登录！",Toast.LENGTH_SHORT).show();
                     break;
                     default:
+                        break;
             }
         }
     };
@@ -98,11 +118,16 @@ public class MainActivity extends BasicActivity {
         viewPager = (ViewPager) findViewById(R.id.viewPager);
         list = new ArrayList<>();
         tvhuoqu = (TextView) findViewById(R.id.text_huoqu);
+        tv_tianqi =(TextView) findViewById(R.id.tv_tianqi);
+          tv_kongqi =(TextView) findViewById(R.id.tv_kongqi);
+         image_weather =(ImageView) findViewById(R.id.img_weather);
+         tv_airqlty =(TextView) findViewById(R.id.tv_airqlty);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
+        getWeather();
        /* toolbar.setLogo(R.drawable.icon);//设置图片logo,你可以添加自己的图片*/
         toolbar.setTitle("简易新闻");
         setSupportActionBar(toolbar);
@@ -242,6 +267,87 @@ public class MainActivity extends BasicActivity {
 
     }
 
+    private void getWeather() {
+        /**
+         * 实况天气
+         * 实况天气即为当前时间点的天气状况以及温湿风压等气象指数，具体包含的数据：体感温度、
+         * 实测温度、天气状况、风力、风速、风向、相对湿度、大气压强、降水量、能见度等。
+         *
+         * @param context  上下文
+         * @param location 地址详解
+         * @param lang       多语言，默认为简体中文
+         * @param unit        单位选择，公制（m）或英制（i），默认为公制单位
+         * @param listener  网络访问回调接口
+         */
+        HeWeather.getWeatherNow(MainActivity.this, "CN101190101",  Lang.CHINESE_SIMPLIFIED , Unit.METRIC , new HeWeather.OnResultWeatherNowBeanListener() {
+            public static final String TAG="he_feng_now";
+            @Override
+            public void onError(Throwable e) {
+                Log.i(TAG, "onError: ", e);
+                System.out.println("Weather Now Error:"+new Gson());
+            }
+
+            @Override
+            public void onSuccess(Now dataObject) {
+                Log.i(TAG, " Weather Now onSuccess: " + new Gson().toJson(dataObject));
+                String jsonData = new Gson().toJson(dataObject);
+                System.out.println("返回的数据内容："+dataObject.getStatus());
+                String tianqi = null,wendu = null, tianqicode = null;
+                if (dataObject.getStatus().equals("ok")){
+                    String JsonNow = new Gson().toJson(dataObject.getNow());
+                    JSONObject jsonObject = null;
+                    try {
+                        jsonObject = new JSONObject(JsonNow);
+                        tianqi = jsonObject.getString("cond_txt");
+                        wendu = jsonObject.getString("tmp");
+                        tianqicode = jsonObject.getString("cond_code");
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }else {
+                    Toast.makeText(MainActivity.this,"有错误",Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                String wendu2 = wendu +"℃";
+                tv_tianqi.setText(tianqi);
+                tv_kongqi.setText(wendu2);
+                String tagurl = "https://cdn.heweather.com/cond_icon/" +tianqicode+".png";
+                Glide.with(MainActivity.this).load(tagurl).into(image_weather);
+            }
+        });
+        HeWeather.getAirNow(MainActivity.this, "CN101190101", Lang.CHINESE_SIMPLIFIED, Unit.METRIC, new HeWeather.OnResultAirNowBeansListener() {
+            public static final String TAG2="he_feng_air";
+            @Override
+            public void onError(Throwable throwable) {
+                Log.i(TAG2,"ERROR IS:",throwable);
+            }
+
+            @Override
+            public void onSuccess(AirNow airNow) {
+                Log.i(TAG2,"Air Now onSuccess:"+new Gson().toJson(airNow));
+                String airStatus = airNow.getStatus();
+                if (airStatus.equals("ok")){
+                    String jsonData = new Gson().toJson(airNow.getAir_now_city());
+                    String aqi = null,qlty = null;
+                    JSONObject objectAir = null;
+                    try {
+                        objectAir = new JSONObject(jsonData);
+                        aqi = objectAir.getString("aqi");
+                        qlty = objectAir.getString("qlty");
+                        tv_airqlty.setText(qlty+"("+aqi+")");
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }else {
+                    Toast.makeText(MainActivity.this,"有错误",Toast.LENGTH_SHORT).show();
+                    return;
+                }
+            }
+
+        });
+
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         //获取toolbar菜单项
@@ -290,7 +396,51 @@ public class MainActivity extends BasicActivity {
                 }).start();
                 break;
             case R.id.userFeedback:
-                final EditText ed =new EditText(MainActivity.this);
+                new MaterialDialog.Builder(MainActivity.this)
+                        .title("意见反馈")
+                        .inputRangeRes(2,20,R.color.yellow)
+                        .inputType(InputType.TYPE_CLASS_TEXT)
+                        .input("请输入反馈信息", null, new MaterialDialog.InputCallback() {
+                            @Override
+                            public void onInput(@NonNull MaterialDialog dialog, CharSequence input) {
+                                new Thread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        String input_text = input.toString();
+                                        if ("".equals(MyApplication.getMoublefhoneUser()) || MyApplication.getMoublefhoneUser() == null) {
+                                            Message msg = Message.obtain();
+                                            msg.what =USER_ISNULL;
+                                            userFeedHandler.sendMessage(msg);
+                                        } else if ("".equals(input_text) || input_text == null) {
+                                            Message msg = Message.obtain();
+                                            msg.what =USER_FEEDBACK;
+                                            userFeedHandler.sendMessage(msg);
+                                        }else {
+                                            Connection conn = null;
+                                            conn = (Connection) DBOpenHelper.getConn();
+                                            String sql = "insert into user_feedback(user_feed,user_phone) values(?,?)";
+                                            int i = 0;
+                                            PreparedStatement pstmt;
+                                            try {
+                                                pstmt = (PreparedStatement) conn.prepareStatement(sql);
+                                                pstmt.setString(1, input_text);
+                                                pstmt.setString(2,MyApplication.getMoublefhoneUser());
+                                                i = pstmt.executeUpdate();
+                                                pstmt.close();
+                                                conn.close();
+                                            } catch (SQLException e) {
+                                                e.printStackTrace();
+                                            }
+                                            Message msg = Message.obtain();
+                                            msg.what =USER_FEEDBACK;
+                                            userFeedHandler.sendMessage(msg);
+                                        }
+                                    }
+
+                                }).start();
+                            }
+                        }).positiveText("确定").negativeText("取消").show();
+               /* final EditText ed =new EditText(MainActivity.this);
                 AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);
                 dialog.setTitle("用户反馈");
                 dialog.setView(ed);
@@ -337,27 +487,31 @@ public class MainActivity extends BasicActivity {
                     public void onClick(DialogInterface dialog, int which) {
                     }
                 });
-                dialog.show();
+                dialog.show();*/
                 break;
             case R.id.userExit:
-                AlertDialog.Builder dia = new AlertDialog.Builder(MainActivity.this);
-                dia.setTitle("Warning");
-                dia.setMessage("是否推出程序？");
-                dia.setCancelable(false);
-                dia.setPositiveButton("确认", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        ActivityCollector.finishAll();
-                    }
-                });
-                dia.setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                    }
-                });
-                dia.show();
+                final SweetAlertDialog mDialog = new SweetAlertDialog(MainActivity.this,SweetAlertDialog.NORMAL_TYPE)
+                        .setTitleText("提示")
+                        .setContentText("您是否要退出？")
+                        .setCustomImage(null)
+                        .setCancelText("取消")
+                        .setConfirmText("确定")
+                        .setCancelClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                            @Override
+                            public void onClick( SweetAlertDialog sweetAlertDialog) {
+                                sweetAlertDialog.dismiss();
+                            }
+                        }).setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                            @Override
+                            public void onClick(SweetAlertDialog sweetAlertDialog) {
+                                sweetAlertDialog.dismiss();
+                                ActivityCollector.finishAll();
+                            }
+                        });
+                mDialog.show();
                 break;
             default:
+                break;
 
         }
         return true;

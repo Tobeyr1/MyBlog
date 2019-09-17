@@ -3,6 +3,9 @@ package com.example.frametest.tools;
 import android.app.Application;
 import android.content.Context;
 
+import interfaces.heweather.com.interfacesmodule.view.HeConfig;
+import interfaces.heweather.com.interfacesmodule.view.HeWeather;
+
 public class MyApplication extends Application {
     private static Context context;
     private static MyApplication instance;
@@ -15,6 +18,8 @@ public class MyApplication extends Application {
         super.onCreate();
         //实例个人Application类
         instance = this;
+        HeConfig.init("HE1909171034071268","54bd7c993b3b4d4588a5258b1e7bc85d");
+        HeConfig.switchToFreeServerNode();
     }
     public static MyApplication getInstance(){
         return instance;

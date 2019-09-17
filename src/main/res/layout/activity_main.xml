@@ -17,7 +17,53 @@
             android:layout_width="match_parent"
             android:background="@color/colorPrimary"
             app:titleTextColor="@color/colorWhite"
-            />
+            >
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="right|center_vertical"
+                android:layout_marginLeft="14dp"
+                android:gravity="right">
+
+
+                <TextView
+                    android:id="@+id/tv_tianqi"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:textColor="#000"
+                    />
+                <ImageView
+                    android:id="@+id/img_weather"
+                    android:layout_width="17dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_height="17dp"
+                    />
+                <TextView
+                    android:id="@+id/tv_kongqi"
+                    android:layout_width="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_height="wrap_content"
+                    android:textColor="#000"
+                    />
+                <TextView
+                    android:id="@+id/tv_airqlty"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:textColor="#000"
+                    />
+               <!-- <ImageView
+                    android:id="@+id/image_exit"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="center_vertical"
+                    android:background="@drawable/exit" />-->
+
+            </LinearLayout>
+
+        </android.support.v7.widget.Toolbar>
         <!--其中的 app:titleTextColor="@color/colorRed"是我自己在color中设置了颜色属性值为#F00-->
         <android.support.design.widget.TabLayout
             android:id="@+id/tabLayout"
