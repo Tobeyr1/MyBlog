@@ -1,8 +1,10 @@
 package com.example.frametest;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -14,7 +16,6 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AlertDialog;
 import android.os.Bundle;
 import android.text.InputType;
 import android.text.TextUtils;
@@ -23,7 +24,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -42,8 +42,10 @@ import com.example.frametest.UserMode.User_DataActivity;
 import com.example.frametest.UserMode.User_LogoutActivity;
 import com.example.frametest.tools.ActivityCollector;
 import com.example.frametest.tools.BasicActivity;
+import com.example.frametest.tools.ClearMessageUtil;
 import com.example.frametest.tools.DBOpenHelper;
 import com.example.frametest.tools.MyApplication;
+import com.example.frametest.tools.ToastUtil;
 import com.google.gson.Gson;
 
 import org.json.JSONArray;
@@ -94,6 +96,7 @@ public class MainActivity extends BasicActivity {
     public AMapLocationClientOption mLocationOption=null;
 
     private   String CityId;
+    static Context mContext;
     @SuppressLint("HandlerLeak")
     private Handler userFeedHandler = new Handler(){
         @Override
@@ -121,6 +124,7 @@ public class MainActivity extends BasicActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mContext =getApplicationContext();
         initMap();
         toolbar =  findViewById(R.id.toolbar);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout); //获取抽屉布局
@@ -364,9 +368,11 @@ public class MainActivity extends BasicActivity {
                         }
                         break;
                     case R.id.nav_settings:
-                        Intent logoutIntent = new Intent(MainActivity.this,User_LogoutActivity.class);
-                        startActivity(logoutIntent);
-                        Toast.makeText(MainActivity.this,"需要做出注销功能，可扩展夜间模式，离线模式等,检查更新",Toast.LENGTH_LONG).show();
+                        //调用方法
+                        clearCache();
+                       // Intent logoutIntent = new Intent(MainActivity.this,User_LogoutActivity.class);
+                      //  startActivity(logoutIntent);
+                      //  Toast.makeText(MainActivity.this,"需要做出注销功能，可扩展夜间模式，离线模式等,检查更新",Toast.LENGTH_LONG).show();
                         break;
                     case R.id.nav_exit:
                         Intent intent = new Intent(MainActivity.this,LoginActivity.class);
@@ -457,7 +463,36 @@ public class MainActivity extends BasicActivity {
 
 
     }
+    ClearCacheListener mClearCacheListener = new ClearCacheListener() {
+        @Override
+        public void onClearCacheFinished() {
+            Looper.prepare();
+            ToastUtil.showShortToastCenter(mContext,"缓存已清理");
+            Looper.loop();
+        }
+    };
 
+    private void clearCache() {
+        ClearCacheRunnable runnable = new ClearCacheRunnable(mClearCacheListener);
+        Thread thread = new Thread(runnable);
+        thread.start();
+    }
+    public static class ClearCacheRunnable implements Runnable {
+        ClearCacheListener listener;
+
+        public ClearCacheRunnable(ClearCacheListener listener) {
+            this.listener = listener;
+        }
+
+        @Override
+        public void run() {
+            ClearMessageUtil.clearAllCache(mContext);
+            listener.onClearCacheFinished();
+        }
+    }
+    public interface ClearCacheListener {
+        void onClearCacheFinished();
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -624,4 +659,5 @@ public class MainActivity extends BasicActivity {
             System.exit(0);
         }
     }
+
 }
