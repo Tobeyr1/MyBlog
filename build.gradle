@@ -45,14 +45,14 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:3.14.0'
     implementation 'com.google.code.gson:gson:2.6.2'
     implementation 'com.github.bumptech.glide:glide:4.2.0'
-   // implementation 'com.jakewharton:butterknife:10.2.0'
+    // implementation 'com.jakewharton:butterknife:10.2.0'
     //annotationProcessor 'com.jakewharton:butterknife-compiler:10.2.0'
     //第三方弹出框
     implementation 'com.github.cazaea:sweet-alert-dialog:1.0.0'
     implementation 'com.afollestad.material-dialogs:core:0.9.6.0'
     //高德定位及3D地图
-    implementation'com.amap.api:3dmap:latest.integration'
-    implementation'com.amap.api:location:latest.integration'
+    implementation 'com.amap.api:3dmap:latest.integration'
+    implementation 'com.amap.api:location:latest.integration'
     implementation 'com.nostra13.universalimageloader:universal-image-loader:1.9.5'
     implementation files('libs/mysql-connector-java-5.1.47.jar')
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'

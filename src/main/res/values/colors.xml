@@ -11,4 +11,12 @@
     <color name="colorBackground">#ffffff</color>
     <color name="jinse">#FFD700</color>
     <color name="yellow">#ff0</color>
+
+    <color name="white">#fff</color>
+    <color name="pctvcolor">#545454</color>
+    <color name="colorbackground">#eeeeee</color>
+    <color name="colorpanelouter">#f2f2f2</color>
+    <color name="buttoncolor">#099bfb</color>
+    <color name="title">#3A91FB</color>
+
 </resources>

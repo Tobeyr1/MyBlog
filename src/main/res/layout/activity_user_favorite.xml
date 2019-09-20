@@ -12,9 +12,9 @@
         <android.support.v7.widget.Toolbar
             android:id="@+id/userFavorite_toolbar"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
+            android:layout_height="40dp"
             android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            android:background="?attr/colorPrimary"
+            android:background="@color/title"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
         <ListView
             android:id="@+id/list_news"

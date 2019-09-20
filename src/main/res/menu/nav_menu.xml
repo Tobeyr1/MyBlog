@@ -5,7 +5,7 @@
         <item android:id="@+id/nav_call" android:title="编辑资料" android:icon="@drawable/nav_call"
             android:checkable="true"
              />
-        <item android:id="@+id/nav_friends" android:title="我的好友" android:icon="@drawable/nav_friends"
+        <item android:id="@+id/nav_friends" android:title="系统设置" android:icon="@drawable/nav_friends"
 
             android:checkable="true"/>
         <item android:id="@+id/nav_location" android:title="发布新闻" android:icon="@drawable/nav_location"

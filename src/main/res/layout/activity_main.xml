@@ -15,7 +15,7 @@
             android:id="@+id/toolbar"
             android:layout_height="?attr/actionBarSize"
             android:layout_width="match_parent"
-            android:background="@color/colorPrimary"
+            android:background="@color/title"
             app:titleTextColor="@color/colorWhite"
             >
             <LinearLayout
@@ -32,7 +32,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:textColor="#000"
+                    android:textColor="@color/white"
                     />
                 <ImageView
                     android:id="@+id/img_weather"
@@ -45,14 +45,14 @@
                     android:layout_width="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_height="wrap_content"
-                    android:textColor="#000"
+                    android:textColor="@color/white"
                     />
                 <TextView
                     android:id="@+id/tv_airqlty"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:textColor="#000"
+                    android:textColor="@color/white"
                     />
                <!-- <ImageView
                     android:id="@+id/image_exit"

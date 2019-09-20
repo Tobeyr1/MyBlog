@@ -12,15 +12,22 @@ import android.os.Message;
 import android.support.v7.app.ActionBar;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.AdapterView;
+import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.Toast;
 import com.example.frametest.UserMode.LoginActivity;
+import com.example.frametest.UserMode.NewsInfoAdapter;
+import com.example.frametest.UserMode.UserFavoriteActivity;
 import com.example.frametest.json.NewsBean;
 import com.example.frametest.tools.BasicActivity;
 import com.example.frametest.tools.DBOpenHelper;
@@ -41,18 +48,20 @@ public class WebActivity extends BasicActivity {
     private final  static int SEARCH_MOHU =1;
     String url,user_phonenumber;
     private boolean flags=true;
-    private List<NewsBean.ResultBean.DataBean> list;
     private Dialog mDialog;
+    private List<NewsBean.ResultBean.DataBean> newList = new ArrayList<>();
+    private ListView listView;
     @SuppressLint("HandlerLeak")
     private Handler searchHandler = new Handler(){
         @Override
         public void handleMessage(Message msg) {
            switch (msg.what){
                case SEARCH_MOHU:
-                   list = ((NewsBean) msg.obj).getResult().getData();
-
-                   System.out.println("*&*&*&*&*&*&*&*&");
-                   System.out.println(list.size());
+                   NewsInfoAdapter adapter = new NewsInfoAdapter(WebActivity.this,R.layout.item_layout_news,newList);
+                   listView.setVisibility(View.VISIBLE);
+                   listView.setAdapter(adapter);
+                   adapter.notifyDataSetChanged();
+                   DialogUtil.closeDialog(mDialog);
                    break;
            }
         }
@@ -65,6 +74,7 @@ public class WebActivity extends BasicActivity {
         webView = (WebView) findViewById(R.id.webView);
         toolbar = (Toolbar) findViewById(R.id.toolbar_webview);
         ltoolBar = (Toolbar) findViewById(R.id.toolbar_webcomment);
+        listView = (ListView) findViewById(R.id.list_view);
         findViewById(R.id.toolbar_webcomment).bringToFront();
     }
 
@@ -72,7 +82,16 @@ public class WebActivity extends BasicActivity {
     protected void onStart() {
         super.onStart();
         url = getIntent().getStringExtra("url");
-        System.out.println("新闻");
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                NewsBean.ResultBean.DataBean dataBean = newList.get(position);
+                String url = dataBean.getUrl();
+                Intent intent = new Intent(getApplicationContext(),WebActivity.class);
+                intent.putExtra("url",url);
+                startActivity(intent);
+            }
+        });
         //显示JavaScript页面
         WebSettings settings = webView.getSettings();
         webView.setWebViewClient(new WebViewClient(){
@@ -177,42 +196,44 @@ public class WebActivity extends BasicActivity {
         getMenuInflater().inflate(R.menu.toolbar_webview,menu);
         final SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         SearchView searchView = (SearchView) menu.findItem(R.id.news_search).getActionView();
+        searchView.setSubmitButtonEnabled(true);
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(final String query) {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        NewsBean newsBean = new NewsBean();
-                        List<NewsBean.ResultBean.DataBean> dataBeanList = new ArrayList<>();
-                        Connection conn = null;
-                        conn = DBOpenHelper.getConn();
-                        String sql ="select title from news_info where  match(title,category) AGAINST ('"+query+"' IN BOOLEAN MODE )";
-                        PreparedStatement pst;
-                        try {
-                            pst =(PreparedStatement) conn.prepareStatement(sql);
-                            ResultSet rs = pst.executeQuery();
-                            while (rs.next()){
-                                NewsBean.ResultBean.DataBean dataBean = new NewsBean.ResultBean.DataBean();
-                                dataBean.setTitle(rs.getString(1));
-                                dataBeanList.add(dataBean);
+                if (!TextUtils.isEmpty(query)){
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            NewsBean newsBean = new NewsBean();
+                            Connection conn = null;
+                            conn = DBOpenHelper.getConn();
+                            String sql ="select title,url from news_info where  match(title,category) AGAINST ('"+query+"' IN BOOLEAN MODE )";
+                            PreparedStatement pst;
+                            try {
+                                pst =(PreparedStatement) conn.prepareStatement(sql);
+                                ResultSet rs = pst.executeQuery();
+                                while (rs.next()){
+                                    NewsBean.ResultBean.DataBean dataBean = new NewsBean.ResultBean.DataBean();
+                                    dataBean.setTitle(rs.getString(1));
+                                    dataBean.setUrl(rs.getString(2));
+                                    newList.add(dataBean);
+                                }
+                                pst.close();
+                                conn.close();
+                            } catch (SQLException e) {
+                                e.printStackTrace();
                             }
-                            newsBean.setResult(new NewsBean.ResultBean());
-                            newsBean.getResult().setData(dataBeanList);
-                            pst.close();
-                            conn.close();
-                        } catch (SQLException e) {
-                            e.printStackTrace();
+                            Message msg = searchHandler.obtainMessage();
+                            msg.what = SEARCH_MOHU;
+                            searchHandler.sendMessage(msg);
                         }
-                        Message msg = searchHandler.obtainMessage();
-                        msg.what = SEARCH_MOHU;
-                        msg.obj = newsBean;
-                        searchHandler.sendMessage(msg);
-                    }
 
-                }).start();
-                return true;
+                    }).start();
+                    mDialog = DialogUtil.createLoadingDialog(WebActivity.this,"加载中...");
+                }
+
+                return false;
             }
 
             @Override
@@ -228,8 +249,12 @@ public class WebActivity extends BasicActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case android.R.id.home:
-                Intent returnIntent = new Intent();
-                WebActivity.this.finish();
+                if (listView.getVisibility() ==View.VISIBLE){
+                    listView.setVisibility(View.INVISIBLE);
+                }else {
+                    Intent returnIntent = new Intent();
+                    WebActivity.this.finish();
+                }
                 break;
             case R.id.news_setting:
                 Toast.makeText(this,"夜间模式",Toast.LENGTH_SHORT).show();

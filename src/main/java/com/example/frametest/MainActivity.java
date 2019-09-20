@@ -35,6 +35,7 @@ import com.amap.api.location.AMapLocationClientOption;
 import com.amap.api.location.AMapLocationListener;
 import com.bumptech.glide.Glide;
 import com.cazaea.sweetalert.SweetAlertDialog;
+import com.example.frametest.PersonSettings.HomeSettingsActivity;
 import com.example.frametest.UserMode.LoginActivity;
 import com.example.frametest.UserMode.User;
 import com.example.frametest.UserMode.UserFavoriteActivity;
@@ -352,7 +353,8 @@ public class MainActivity extends BasicActivity {
                         }
                         break;
                     case R.id.nav_friends:
-                        //
+                        Intent settingIntent = new Intent(MainActivity.this,HomeSettingsActivity.class);
+                        startActivity(settingIntent);
                         break;
                     case R.id.nav_location:
                         Toast.makeText(MainActivity.this, "你点击了发布新闻，下步实现", Toast.LENGTH_SHORT).show();
