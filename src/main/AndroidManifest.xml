@@ -66,7 +66,8 @@
             android:name="com.amap.api.v2.apikey"
             android:value="bdd54858e0fccbbe928fd3795d72adfe" />
 
-        <activity android:name=".PersonSettings.HomeSettingsActivity"></activity>
+        <activity android:name=".PersonSettings.HomeSettingsActivity" />
+        <activity android:name=".PersonSettings.FontSizeSettingsActivity"></activity>
     </application>
 
 </manifest>

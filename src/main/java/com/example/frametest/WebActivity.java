@@ -146,7 +146,7 @@ public class WebActivity extends BasicActivity {
                         break;
                     case R.id.news_collect:
                         //下一步实现点击收藏功能，以及用户查看收藏功能
-                      user_phonenumber = MyApplication.getInstance().getMoublefhoneUser();
+                      user_phonenumber = MyApplication.getMoublefhoneUser();
                         if (user_phonenumber != null){
                             if (flags){
                             flags = !flags;
@@ -177,6 +177,7 @@ public class WebActivity extends BasicActivity {
                             }
                         } else {
                             Intent exitIntent = new Intent(WebActivity.this,LoginActivity.class);
+                            exitIntent.setFlags(Intent.FLAG_ACTIVITY_NO_USER_ACTION);
                             startActivity(exitIntent);
                         }
                         break;
@@ -191,6 +192,7 @@ public class WebActivity extends BasicActivity {
         }
     }
 
+    @SuppressLint("NewApi")
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.toolbar_webview,menu);

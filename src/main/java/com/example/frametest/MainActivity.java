@@ -346,14 +346,17 @@ public class MainActivity extends BasicActivity {
                         //通过判断手机号是否存在，来决定是进入编辑资料页面还是进入登陆页面
                         if (phonenumber != null){
                             Intent unIntent = new Intent(MainActivity.this,User_DataActivity.class);
+                            unIntent.setFlags(Intent.FLAG_ACTIVITY_NO_USER_ACTION);
                             startActivity(unIntent);
                         } else {
                             Intent exitIntent = new Intent(MainActivity.this,LoginActivity.class);
+                            exitIntent.setFlags(Intent.FLAG_ACTIVITY_NO_USER_ACTION);
                             startActivity(exitIntent);
                         }
                         break;
                     case R.id.nav_friends:
                         Intent settingIntent = new Intent(MainActivity.this,HomeSettingsActivity.class);
+                        settingIntent.setFlags(Intent.FLAG_ACTIVITY_NO_USER_ACTION);
                         startActivity(settingIntent);
                         break;
                     case R.id.nav_location:
@@ -378,6 +381,7 @@ public class MainActivity extends BasicActivity {
                         break;
                     case R.id.nav_exit:
                         Intent intent = new Intent(MainActivity.this,LoginActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NO_USER_ACTION);
                         startActivity(intent);
                         break;
                     default:
@@ -508,8 +512,8 @@ public class MainActivity extends BasicActivity {
         switch (item.getItemId()){
             //R.id.home修改导航按钮的点击事件为打开侧滑栏
             case android.R.id.home:
-                if (MyApplication.getInstance().getMoublefhoneUser() != null){
-                    phonenumber = MyApplication.getInstance().getMoublefhoneUser();
+                if (MyApplication.getMoublefhoneUser() != null){
+                    phonenumber = MyApplication.getMoublefhoneUser();
                 }
                 mDrawerLayout.openDrawer(GravityCompat.START);  //打开侧滑栏
                 tvhuoqu = (TextView) findViewById(R.id.text_huoqu);

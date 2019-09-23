@@ -175,7 +175,7 @@ public class LoginActivity extends BasicActivity implements View.OnClickListener
                                 } catch (SQLException e) {
                                     e.printStackTrace();
                                 }
-                                MyApplication.getInstance().setMoublefhoneUser(inputPhoneEt.getText().toString());
+                                MyApplication.setMoublefhoneUser(inputPhoneEt.getText().toString());
                             }
                         }).start();
                         finish();
@@ -241,7 +241,6 @@ public class LoginActivity extends BasicActivity implements View.OnClickListener
         //存储手机号
         inputText = inputPhoneEt.getText().toString();
         save(inputText);
-        System.out.println("活动毁灭之后是否传值"+MyApplication.getInstance().getMoublefhoneUser());
         System.out.println("活动毁灭之前是否传值"+inputText);
         super.onDestroy();
     }

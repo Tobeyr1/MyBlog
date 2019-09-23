@@ -248,6 +248,7 @@ public class User_DataActivity extends BasicActivity {
     protected void onDestroy() {
         super.onDestroy();
         Intent intent = new Intent();
+        intent.setFlags(Intent.FLAG_ACTIVITY_NO_USER_ACTION);
         finish();
     }
 }
