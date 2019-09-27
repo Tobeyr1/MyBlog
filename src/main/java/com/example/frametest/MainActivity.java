@@ -48,6 +48,7 @@ import com.example.frametest.UserMode.User;
 import com.example.frametest.UserMode.UserFavoriteActivity;
 import com.example.frametest.UserMode.User_DataActivity;
 import com.example.frametest.UserMode.User_LogoutActivity;
+import com.example.frametest.tools.ActionSheet;
 import com.example.frametest.tools.ActivityCollector;
 import com.example.frametest.tools.BasicActivity;
 import com.example.frametest.tools.ClearMessageUtil;
@@ -108,6 +109,7 @@ public class MainActivity extends BasicActivity {
     private final int IMAGE_RESULT_CODE = 3;//表示打开照相机
     private final int PICK = 4;//打开图库
     CircleImageView circleImageView;
+    private ActionSheet actionSheet;
     @SuppressLint("HandlerLeak")
     private Handler userFeedHandler = new Handler(){
         @Override
@@ -340,7 +342,31 @@ public class MainActivity extends BasicActivity {
         circleImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                CharSequence[] items ={"拍照","图库"};//裁剪items选项
+                actionSheet=new ActionSheet.DialogBuilder(MainActivity.this)
+                        .addSheet("拍照", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                                startActivityForResult(intent,IMAGE_RESULT_CODE);
+                                actionSheet.dismiss();
+                            }
+                        })
+                        .addSheet("图库", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                Intent uintent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                                startActivityForResult(uintent,PICK);
+                                actionSheet.dismiss();
+                            }
+                        })
+                        .addCancelListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                actionSheet.dismiss();
+                            }
+                        })
+                        .create();
+             /*   CharSequence[] items ={"拍照","图库"};//裁剪items选项
                 AlertDialog alertDialog =  new AlertDialog.Builder(MainActivity.this)
                         .setItems(items, new DialogInterface.OnClickListener() {
                             @Override
@@ -360,7 +386,7 @@ public class MainActivity extends BasicActivity {
                         }).create();
                 Window window = alertDialog.getWindow();
                 window.setGravity(Gravity.BOTTOM);
-                alertDialog.show();
+                alertDialog.show();*/
 
             }
         });
