@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <item android:id="@+id/userFeedback" android:title="意见反馈" android:icon="@drawable/ic_feedback_black_24dp"
-        app:showAsAction="ifRoom"  tools:ignore="AppCompatRespource" android:orderInCategory="100"/>
+        app:showAsAction="never"  tools:ignore="AppCompatRespource" android:orderInCategory="100"/>
     <item android:id="@+id/userExit" android:title="退出" android:icon="@drawable/exit"
         app:showAsAction="always"  tools:ignore="AppCompatRespource" android:orderInCategory="110"/>
 </menu>
