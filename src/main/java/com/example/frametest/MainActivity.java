@@ -2,10 +2,14 @@ package com.example.frametest;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
@@ -17,13 +21,16 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -98,6 +105,9 @@ public class MainActivity extends BasicActivity {
 
     private   String CityId;
     static Context mContext;
+    private final int IMAGE_RESULT_CODE = 3;//表示打开照相机
+    private final int PICK = 4;//打开图库
+    CircleImageView circleImageView;
     @SuppressLint("HandlerLeak")
     private Handler userFeedHandler = new Handler(){
         @Override
@@ -131,7 +141,7 @@ public class MainActivity extends BasicActivity {
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout); //获取抽屉布局
         navigationView = (NavigationView) findViewById(R.id.nav_design);//获取菜单控件实例
         View v = navigationView.getHeaderView(0);
-        CircleImageView circleImageView =(CircleImageView) v.findViewById(R.id.icon_image);
+        circleImageView =(CircleImageView) v.findViewById(R.id.icon_image);
         tabLayout = (TabLayout) findViewById(R.id.tabLayout);
         viewPager = (ViewPager) findViewById(R.id.viewPager);
         list = new ArrayList<>();
@@ -327,6 +337,33 @@ public class MainActivity extends BasicActivity {
        /* toolbar.setLogo(R.drawable.icon);//设置图片logo,你可以添加自己的图片*/
         toolbar.setTitle("简易新闻");
         setSupportActionBar(toolbar);
+        circleImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                CharSequence[] items ={"拍照","图库"};//裁剪items选项
+                AlertDialog alertDialog =  new AlertDialog.Builder(MainActivity.this)
+                        .setItems(items, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int which) {
+                                switch (which){
+                                    //选择拍照
+                                    case 0:
+                                        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                                        startActivityForResult(intent,IMAGE_RESULT_CODE);
+                                        break;
+                                    case 1:
+                                        Intent uintent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                                        startActivityForResult(uintent,PICK);
+                                        break;
+                                }
+                            }
+                        }).create();
+                Window window = alertDialog.getWindow();
+                window.setGravity(Gravity.BOTTOM);
+                alertDialog.show();
+
+            }
+        });
         ActionBar actionBar = getSupportActionBar();
         if (actionBar !=null){
             //通过HomeAsUp来让导航按钮显示出来
@@ -469,6 +506,29 @@ public class MainActivity extends BasicActivity {
 
 
     }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode){
+            //表示调用照相机拍照
+            case IMAGE_RESULT_CODE:
+                if (resultCode==RESULT_OK){
+                    Bundle bundle = data.getExtras();
+                    Bitmap bitmap = (Bitmap) bundle.get("data");
+                    circleImageView.setImageBitmap(bitmap);
+                }
+                break;
+            case PICK:
+                if (resultCode==RESULT_OK){
+                    Uri uri = data.getData();
+                    circleImageView.setImageURI(uri);
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
     ClearCacheListener mClearCacheListener = new ClearCacheListener() {
         @Override
         public void onClearCacheFinished() {
