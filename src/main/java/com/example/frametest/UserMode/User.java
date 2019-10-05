@@ -5,8 +5,8 @@ public class User {
     private String user_name;
     private String user_phone;
     private String user_pasw;
-    private int user_age;
-    private boolean user_sex;
+    private String user_age;
+    private String user_sex;
 
     public int getId() {
         return id;
@@ -40,19 +40,19 @@ public class User {
         this.user_pasw = user_pasw;
     }
 
-    public int getUser_age() {
+    public String getUser_age() {
         return user_age;
     }
 
-    public void setUser_age(int user_age) {
+    public void setUser_age(String user_age) {
         this.user_age = user_age;
     }
 
-    public boolean isUser_sex() {
+    public String getUser_sex() {
         return user_sex;
     }
 
-    public void setUser_sex(boolean user_sex) {
+    public void setUser_sex(String user_sex) {
         this.user_sex = user_sex;
     }
 }

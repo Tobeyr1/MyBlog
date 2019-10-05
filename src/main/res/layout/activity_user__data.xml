@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/colorbackground"
     tools:context=".UserMode.User_DataActivity">
     <LinearLayout
         android:orientation="vertical"
@@ -18,18 +19,17 @@
             android:background="@color/title"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
         <LinearLayout
+            android:id="@+id/lay_touxiang"
             android:orientation="horizontal"
-            android:background="@color/jinse"
+            android:background="@color/white"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
             <TextView
-                android:id="@+id/tv_user_photo"
                 android:layout_width="300dp"
                 android:layout_height="match_parent"
                 android:background="#01000000"
                 android:gravity="center_vertical"
-                android:clickable="true"
                 android:text="头像"
                 android:textStyle="bold" />
             <ImageView
@@ -39,20 +39,22 @@
                 android:layout_height="55dp"
                 />
         </LinearLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/black"
+            />
         <LinearLayout
-            android:layout_marginTop="15dp"
+            android:id="@+id/layout_name"
             android:orientation="horizontal"
-            android:background="@color/jinse"
+            android:background="@color/white"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
-
             <TextView
-                android:id="@+id/tv_nc"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="55dp"
-                android:layout_gravity="center_horizontal"
                 android:layout_weight="1"
-                android:clickable="true"
+                android:layout_gravity="center_horizontal"
                 android:background="#01000000"
                 android:gravity="center_vertical"
                 android:text="用户名"
@@ -60,21 +62,33 @@
 
             <TextView
                 android:id="@+id/tv_nc_fb"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="match_parent"
-                android:layout_weight="2"
                 android:background="#01000000"
-                android:gravity="center_vertical" />
+                android:gravity="center_vertical|center|right" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginRight="20dp"
+                android:src="@drawable/pdf_next"
+                tools:ignore="RtlHardcoded" />
+
         </LinearLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/black"
+            />
         <LinearLayout
+            android:id="@+id/layout_sex"
             android:orientation="horizontal"
-            android:layout_marginTop="15dp"
-            android:background="@color/jinse"
+            android:background="@color/white"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
-
             <TextView
-                android:id="@+id/tv_xingbie"
                 android:layout_width="match_parent"
                 android:layout_height="55dp"
                 android:layout_weight="1"
@@ -82,25 +96,35 @@
                 android:gravity="center_vertical"
                 android:text="性别"
                 android:textStyle="bold" />
-
             <TextView
-                android:id="@+id/tv_xinbie_fb"
+                android:id="@+id/text_Sex"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="3"
                 android:background="#01000000"
-                android:gravity="center_vertical"
+                android:gravity="center_vertical|center|right"
                 />
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginRight="20dp"
+                android:src="@drawable/pdf_next"
+                tools:ignore="RtlHardcoded" />
         </LinearLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/black"
+            />
         <LinearLayout
-            android:layout_marginTop="15dp"
+            android:id="@+id/layout_Age"
             android:orientation="horizontal"
-            android:background="@color/jinse"
+            android:background="@color/white"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
             <TextView
-                android:id="@+id/tv_nianlin"
                 android:layout_width="match_parent"
                 android:layout_height="55dp"
                 android:layout_weight="1"
@@ -110,13 +134,20 @@
                 android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/tv_nianlin_fb"
+                android:id="@+id/text_Age"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight="3"
+                android:layout_weight="1"
                 android:background="#01000000"
-                android:gravity="center_vertical"
+                android:gravity="center_vertical|center|right"
                 />
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginRight="20dp"
+                android:src="@drawable/pdf_next"
+                tools:ignore="RtlHardcoded" />
         </LinearLayout>
 
     </LinearLayout>

@@ -1,51 +1,54 @@
 package com.example.frametest.UserMode;
 
+
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
-import android.content.ContentUris;
-import android.content.DialogInterface;
+import android.app.DatePickerDialog;
+import android.app.Dialog;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
-import android.provider.DocumentsContract;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AlertDialog;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.text.InputType;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.EditText;
+import android.widget.DatePicker;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.example.frametest.R;
 import com.example.frametest.tools.BasicActivity;
 import com.example.frametest.tools.DBOpenHelper;
+import com.example.frametest.tools.DialogUtil;
 import com.example.frametest.tools.MyApplication;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Calendar;
 
 public class User_DataActivity extends BasicActivity {
     private ImageView imageView_user;
     public static final int CHOOSE_USER_TOUX =11;
     public static final int USER_SETTINGS_NAME =12;
     public static final int USER_UPDATE_NAME =13;
-    private TextView tv_user_photo,tv_nc,tv_nc_fb;
+    public static final int USER_DATE_SELECT =14; //查询用户信息
+    public static final int USER_SEX_INSERT =15;
+    private TextView tv_nc_fb,text_Age,text_Sex;
     String user_setting_phone;
     String input_userName;
+    Calendar calendar;
+    String phone_userfavorite;
+    String user_SEX;
+    Dialog mDialog;
     @SuppressLint("HandlerLeak")
     private Handler userSettingsHandler = new Handler(){
         @Override
@@ -58,6 +61,21 @@ public class User_DataActivity extends BasicActivity {
                 case USER_UPDATE_NAME:
                     tv_nc_fb.setText(input_userName);
                     break;
+                //查询用户信息
+                case USER_DATE_SELECT:
+                    String user_name,user_age,user_sex;
+                    User user =(User)msg.obj;
+                    user_name =user.getUser_name();
+                    user_age=user.getUser_age();
+                    user_sex=user.getUser_sex();
+                    DialogUtil.closeDialog(mDialog);
+                    tv_nc_fb.setText(user_name);
+                    text_Age.setText(user_age);
+                    text_Sex.setText(user_sex);
+                    break;
+                case USER_SEX_INSERT:
+                    text_Sex.setText(user_SEX);
+                    break;
             }
         }
     };
@@ -65,174 +83,219 @@ public class User_DataActivity extends BasicActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user__data);
+        phone_userfavorite = MyApplication.getMoublefhoneUser();
+        //初始化时首先加载用户已有的数据并将其显示出来
+       initData();
         user_setting_phone = MyApplication.getMoublefhoneUser();
         Toolbar uToolbar = (Toolbar) findViewById(R.id.userData_toolbar);
-        tv_user_photo = (TextView)findViewById(R.id.tv_user_photo);
+        text_Age =(TextView)findViewById(R.id.text_Age);
+        text_Sex =(TextView)findViewById(R.id.text_Sex);
+        calendar = Calendar.getInstance();
         imageView_user = (ImageView)findViewById(R.id.imageView_user);
-        tv_nc = (TextView)findViewById(R.id.tv_nc);
         tv_nc_fb = (TextView) findViewById(R.id.tv_nc_fb);
         uToolbar.setTitle("个人信息");
         setSupportActionBar(uToolbar);
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null){
             actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setHomeAsUpIndicator(R.drawable.ic_chevron_left);
+            actionBar.setHomeAsUpIndicator(R.drawable.back);
         }
+        InitView();
     }
+    //定义布局
+    LinearLayout layout_touxiang;
+    LinearLayout layout_name;
+    LinearLayout layout_age;
+    LinearLayout layout_sex;
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        tv_user_photo.setOnClickListener(new View.OnClickListener() {
+    private void initData() {
+        new Thread(new Runnable() {
             @Override
-            public void onClick(View v) {
-                if (ContextCompat.checkSelfPermission(User_DataActivity.this,Manifest.permission.WRITE_EXTERNAL_STORAGE) !=PackageManager.PERMISSION_GRANTED){
-                    ActivityCompat.requestPermissions(User_DataActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},1);
-                }else {
-                    openAlbum();
+            public void run() {
+                Connection conn = null;
+                conn = (Connection) DBOpenHelper.getConn();
+                //这里优化子查询
+                String sql = "select user_name,user_age,user_sex from user_info where  user_phone ='"+user_setting_phone+"'";
+                Statement pstmt;
+                try {
+                    pstmt = (Statement) conn.createStatement();
+                    ResultSet rs = pstmt.executeQuery(sql);
+                    while (rs.next()){
+                        User user = new User();
+                        user.setUser_name(rs.getString(1));
+                        user.setUser_age(rs.getString(2));
+                        user.setUser_sex(rs.getString(3));
+                        Message msg = userSettingsHandler.obtainMessage();
+                        msg.what=USER_DATE_SELECT;
+                        msg.obj = user;
+                        userSettingsHandler.sendMessage(msg);
+                    }
+                    pstmt.close();
+                    conn.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
                 }
             }
-        });
-        tv_nc.setOnClickListener(new View.OnClickListener() {
+        }).start();
+        mDialog = DialogUtil.createLoadingDialog(User_DataActivity.this,"加载中...");
+    }
+
+
+    private void InitView() {
+        layout_touxiang =(LinearLayout) findViewById(R.id.lay_touxiang);
+        layout_name = (LinearLayout)findViewById(R.id.layout_name);
+        layout_age = findViewById(R.id.layout_Age);
+        layout_sex =findViewById(R.id.layout_sex);
+        layout_touxiang.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                final EditText editText =new EditText(User_DataActivity.this);
-                AlertDialog.Builder alog = new AlertDialog.Builder(User_DataActivity.this);
-                alog.setTitle("输入用户名");
-                alog.setView(editText);
-                alog.setCancelable(false);
-                alog.setPositiveButton("提交", new DialogInterface.OnClickListener() {
+            public void onClick(View view) {
+               Toast.makeText(getApplicationContext(),"头像将放在主界面实现",Toast.LENGTH_SHORT).show();
+            }
+        });
+        layout_name.setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("ResourceAsColor")
+            @Override
+            public void onClick(View view) {
+                new   MaterialDialog.Builder(User_DataActivity.this).title("修改昵称")
+                        // danlanse的颜色代码为 #C6E2FF，可以起替换为你喜欢的颜色
+                        .inputRangeRes(1,8,R.color.danlanse)
+                        .inputType(InputType.TYPE_CLASS_TEXT)
+                        .linkColor(R.color.danlanse)
+                        .input("请输入", null, new MaterialDialog.InputCallback() {
+                            @Override
+                            public void onInput(@NonNull MaterialDialog dialog, CharSequence input) {
+                                new Thread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        input_userName = input.toString();
+                                        if ("".equals(input_userName) || input_userName == null) {
+                                            //此处优化
+                                            //
+                                            Message msg = userSettingsHandler.obtainMessage();
+                                            msg.what =USER_SETTINGS_NAME;
+                                            userSettingsHandler.sendMessage(msg);
+                                        } else {
+                                            Connection conn = null;
+                                            conn = (Connection) DBOpenHelper.getConn();
+                                            String sql = "update user_info set user_name='"+input_userName+"' where user_phone='"+user_setting_phone+"'";
+                                            int i = 0;
+                                            PreparedStatement pstmt;
+                                            try {
+                                                pstmt = (PreparedStatement) conn.prepareStatement(sql);
+                                                i = pstmt.executeUpdate();
+                                                pstmt.close();
+                                                conn.close();
+                                                //此处优化
+                                                //
+                                                Message msg = userSettingsHandler.obtainMessage();
+                                                msg.what = USER_UPDATE_NAME;
+                                                userSettingsHandler.sendMessage(msg);
+                                            } catch (SQLException e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                    }
+                                }).start();
+                            }
+                        }).positiveText("确定").positiveColor(R.color.danlanse).negativeText("取消").negativeColor(R.color.black).show();
+            }
+
+        });
+        layout_sex.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int [] itemId ={11,12};
+                String [] contentArray = {"男","女"};
+                new MaterialDialog.Builder(User_DataActivity.this)
+                        .title("选择你的性别").items(contentArray).itemsIds(itemId).itemsCallbackSingleChoice(-1, new MaterialDialog.ListCallbackSingleChoice() {
+                    @SuppressLint("ResourceType")
                     @Override
-                    public void onClick(DialogInterface dialog, int which) {
+                    public boolean onSelection(MaterialDialog dialog, View itemView, int which, CharSequence text) {
                         new Thread(new Runnable() {
                             @Override
                             public void run() {
-                                input_userName = editText.getText().toString();
-                                if ("".equals(input_userName) || input_userName == null) {
+
+                                int id =itemView.getId();
+                                if (id==11){
+                                    user_SEX="男";
+                                }else if (id==12){
+                                    user_SEX="女";
+                                }
+                                Connection conn = null;
+                                conn = (Connection) DBOpenHelper.getConn();
+                                String sql = "update user_info set user_sex='"+user_SEX+"' where user_phone='"+user_setting_phone+"'";
+                                int i = 0;
+                                PreparedStatement pstmt;
+                                try {
+                                    pstmt = (PreparedStatement) conn.prepareStatement(sql);
+                                    i = pstmt.executeUpdate();
+                                    pstmt.close();
+                                    conn.close();
                                     //此处优化
                                     //
                                     Message msg = userSettingsHandler.obtainMessage();
-                                    msg.what =USER_SETTINGS_NAME;
+                                    msg.what = USER_SEX_INSERT;
                                     userSettingsHandler.sendMessage(msg);
-                                } else {
-                                    Connection conn = null;
-                                    conn = (Connection) DBOpenHelper.getConn();
-                                    String sql = "update user_info set user_name='"+input_userName+"' where user_phone='"+user_setting_phone+"'";
-                                    int i = 0;
-                                    PreparedStatement pstmt;
-                                    try {
-                                        pstmt = (PreparedStatement) conn.prepareStatement(sql);
-                                        i = pstmt.executeUpdate();
-                                        pstmt.close();
-                                        conn.close();
-                                        //此处优化
-                                        //
-                                        Message msg = userSettingsHandler.obtainMessage();
-                                        msg.what = USER_UPDATE_NAME;
-                                        userSettingsHandler.sendMessage(msg);
-                                    } catch (SQLException e) {
-                                        e.printStackTrace();
-                                    }
+                                } catch (SQLException e) {
+                                    e.printStackTrace();
                                 }
                             }
                         }).start();
-                    }
-                });
-                alog.setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                    }
-                });
-                alog.show();
-
-
+                        return true;
+                    };
+                }).show();
             }
         });
+        layout_age.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                DatePickerDialog dialog = new DatePickerDialog(User_DataActivity.this, listener,
+                        calendar.get(Calendar.YEAR),
+                        calendar.get(Calendar.MONTH),
+                        calendar.get(Calendar.DAY_OF_MONTH));
+                dialog.show();
+            }
+        });
+
     }
-    private void openAlbum() {
-        Intent mIntent = new Intent("android.intent.action.GET_CONTENT");
-        mIntent.setType("image/*");
-        startActivityForResult(mIntent,CHOOSE_USER_TOUX);
-    }
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode){
-            case 1:
-                if (grantResults.length>0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
-                    openAlbum();
-                }else {
-                    Toast.makeText(this,"you denied the permission",Toast.LENGTH_SHORT).show();
-                }
-                break;
-            default:
-        }
-    }
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        switch (requestCode){
-            case CHOOSE_USER_TOUX:
-                if (resultCode == RESULT_OK) {
-                    if (Build.VERSION.SDK_INT >= 19){
-                        handleImageOnKiKat(data);
-                    }else {
-                        handleImageBeforeKiKat(data);
+    private DatePickerDialog.OnDateSetListener listener = new DatePickerDialog.OnDateSetListener() {
+
+        @Override
+        public void onDateSet(DatePicker datePicker, int year, int monthOfYear, int dayOfMonth) {
+            String user_AGE=year+"-"+(monthOfYear + 1)+"-"+dayOfMonth;
+            System.out.println("用户的出生日期："+user_AGE);
+            text_Age.setText(year+"-"+(monthOfYear + 1)+"-"+dayOfMonth);
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    if ("".equals(user_AGE) || user_AGE == null) {
+                        //此处优化
+                        //
+                        Message msg = userSettingsHandler.obtainMessage();
+                        msg.what =USER_SETTINGS_NAME;
+                        userSettingsHandler.sendMessage(msg);
+                    } else {
+                        Connection conn = null;
+                        conn = (Connection) DBOpenHelper.getConn();
+                        String sql = "update user_info set user_age='"+user_AGE+"' where user_phone='"+user_setting_phone+"'";
+                        int i = 0;
+                        PreparedStatement pstmt;
+                        try {
+                            pstmt = (PreparedStatement) conn.prepareStatement(sql);
+                            i = pstmt.executeUpdate();
+                            pstmt.close();
+                            conn.close();
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
-                break;
-        }
-    }
-    @TargetApi(Build.VERSION_CODES.KITKAT)
-    private void handleImageOnKiKat(Intent data) {
-        String imagePath = null;
-        Uri uri = data.getData();
-        if (DocumentsContract.isDocumentUri(this,uri)){
-            String docId = DocumentsContract.getDocumentId(uri);
-            if ("com.android.providers.media.documents".equals(uri.getAuthority())){
-                String id = docId.split(":")[1];
-                String selection = MediaStore.Images.Media._ID + "=" + id;
-                imagePath = getImagePath(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,selection);
-            }else if ("com.android.providers.downloads.documents".equals(uri.getAuthority())){
-                Uri contentUri = ContentUris.withAppendedId(Uri.parse("content://downloads/public_downloads"),Long.valueOf(docId));
-                imagePath = getImagePath(contentUri,null);
-            }
-        } else if ("content".equalsIgnoreCase(uri.getScheme())){
-            //如或是content类型的URI就使用普通方法处理
-            imagePath = getImagePath(uri,null);
+            }).start();
 
-        } else if ("file".equalsIgnoreCase(uri.getScheme())){
-            //如果是file类型的直接获取图片路径就行
-            imagePath = uri.getPath();
         }
-        diplayImage(imagePath); //根据路径显示图片
-    }
-    private void handleImageBeforeKiKat(Intent data) {
-        Uri uri = data.getData();
-        String imagePath = getImagePath(uri,null);
-        diplayImage(imagePath);
-    }
 
-    private String getImagePath(Uri uri, String selection) {
-        String path = null;
-        //通过Uri和selection来获取真实的图片路径
-        Cursor cursor = getContentResolver().query(uri,null,selection,null,null);
-        if (cursor != null){
-            if (cursor.moveToFirst()){
-                path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
-            }
-            cursor.close();
-        }
-        return path;
-    }
+    };
 
-    private void diplayImage(String imagePath) {
-        if (imagePath != null){
-            Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
-            imageView_user.setImageBitmap(bitmap);
-            int a =10;
-        } else {
-            Toast.makeText(this,"failed to get image",Toast.LENGTH_SHORT).show();
-        }
-    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -251,4 +314,6 @@ public class User_DataActivity extends BasicActivity {
         intent.setFlags(Intent.FLAG_ACTIVITY_NO_USER_ACTION);
         finish();
     }
+
+
 }

@@ -366,27 +366,6 @@ public class MainActivity extends BasicActivity {
                             }
                         })
                         .create();
-             /*   CharSequence[] items ={"拍照","图库"};//裁剪items选项
-                AlertDialog alertDialog =  new AlertDialog.Builder(MainActivity.this)
-                        .setItems(items, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int which) {
-                                switch (which){
-                                    //选择拍照
-                                    case 0:
-                                        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                                        startActivityForResult(intent,IMAGE_RESULT_CODE);
-                                        break;
-                                    case 1:
-                                        Intent uintent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                                        startActivityForResult(uintent,PICK);
-                                        break;
-                                }
-                            }
-                        }).create();
-                Window window = alertDialog.getWindow();
-                window.setGravity(Gravity.BOTTOM);
-                alertDialog.show();*/
 
             }
         });
